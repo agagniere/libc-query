@@ -1,0 +1,15 @@
+.{
+    .name = .libcquery,
+    .version = "0.0.1",
+    .minimum_zig_version = "0.14.0",
+    .fingerprint = 0xe32cbf40e1b96dff,
+
+    .paths = .{
+        "glibc_abi.zig",
+        "libc_features.zig",
+        "libc_headers.zig",
+        "build.zig",
+        "build.zig.zon",
+        "LICENSE",
+    },
+}
