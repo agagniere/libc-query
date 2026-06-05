@@ -1,0 +1,6 @@
+.zig-cache
+*.a
+*.dylib
+*.so
+zig-out
+zig-pkg
