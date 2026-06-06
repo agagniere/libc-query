@@ -19,7 +19,9 @@ from pathlib import Path
 
 # Headers to track. Add any header a C package commonly probes for.
 HEADERS: list[str] = [
+    "atomic.h",
     "copyfile.h",
+    "crtdefs.h",
     "execinfo.h",
     "getopt.h",
     "inttypes.h",

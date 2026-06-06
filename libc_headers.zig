@@ -10,7 +10,9 @@ const std = @import("std");
 pub const LibcHeaders = struct {
     // Availability reference:
     //
+    // atomic.h:              NetBSD
     // copyfile.h:            macOS
+    // crtdefs.h:             Windows (not a tracked target)
     // execinfo.h:            glibc, FreeBSD, NetBSD, OpenBSD, macOS, DragonFly
     // getopt.h:              all supported targets
     // inttypes.h:            all supported targets
@@ -46,7 +48,9 @@ pub const LibcHeaders = struct {
     unistd_h: bool = true,
 
     // OS-specific
+    atomic_h: bool = false,
     copyfile_h: bool = false,
+    crtdefs_h: bool = false,
     execinfo_h: bool = false,
     sys_epoll_h: bool = false,
     sys_event_h: bool = false,
@@ -132,6 +136,7 @@ fn detectOpenBSD() LibcHeaders {
 
 fn detectNetBSD() LibcHeaders {
     return .{
+        .atomic_h = true,
         .execinfo_h = true,
         .sys_event_h = true,
         .sys_ucred_h = true,
