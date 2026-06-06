@@ -6,7 +6,7 @@ Covers **glibc**, **musl**, **macOS**, **FreeBSD**, **OpenBSD**, **NetBSD**, and
 
 ## What is tracked
 
-**`libc_features`** — optional libc functions: `accept4`, `arc4random`, `arc4random_buf`, `arc4random_uniform`, `backtrace_symbols`, `copy_file_range`, `explicit_bzero`, `getauxval`, `getentropy`, `getifaddrs`, `getrandom`, `memmem`, `mkdtemp`, `posix_fadvise`, `posix_fallocate`, `ppoll`, `reallocarray`, `strlcat`, `strlcpy`, `strndup`, `sync_file_range`, `syncfs`, `vasprintf`.
+**`libc_features`** — optional libc functions: `accept4`, `arc4random`, `arc4random_buf`, `arc4random_uniform`, `backtrace_symbols`, `copy_file_range`, `explicit_bzero`, `getauxval`, `getentropy`, `getifaddrs`, `getrandom`, `memmem`, `memset_s`, `mkdtemp`, `posix_fadvise`, `posix_fallocate`, `ppoll`, `reallocarray`, `strlcat`, `strlcpy`, `strndup`, `strchrnul`, `sync_file_range`, `syncfs`, `vasprintf`.
 
 **`libc_headers`** — system headers: standard POSIX/C99 headers (always `true` on supported targets) plus OS-specific ones such as `sys/epoll.h`, `sys/event.h`, `sys/ucred.h`, `execinfo.h`, `xlocale.h`, `copyfile.h`, and others.
 

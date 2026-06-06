@@ -41,6 +41,7 @@ pub const LibcFeatures = struct {
     // getrandom:         glibc 2.25, FreeBSD 12.0
     // inet_pton:         POSIX.1 (ubiquitous)
     // memmem:            glibc (ancient), FreeBSD (ancient), OpenBSD (ancient), macOS 10.7
+    // memset_s:          C11 Annex K; macOS 10.9, FreeBSD 11.1, DragonFly 5.8 (not glibc/musl/OpenBSD/NetBSD)
     // mkdtemp:           glibc (ancient), BSDs (ancient), macOS, musl
     // posix_fadvise:     glibc (ancient), FreeBSD 6.0, NetBSD 4.0, DragonFly, musl; NOT macOS/OpenBSD
     // posix_fallocate:   glibc (ancient), FreeBSD 11.0, NetBSD 7.0, musl; NOT macOS/OpenBSD
@@ -91,6 +92,7 @@ pub const LibcFeatures = struct {
     getrandom: bool = false,
     inet_pton: bool = true,
     memmem: bool = false,
+    memset_s: bool = false,
     mkdtemp: bool = false,
     posix_fadvise: bool = false,
     posix_fallocate: bool = false,
@@ -240,6 +242,7 @@ fn detectDarwin(target: std.Target) LibcFeatures {
         .getpeereid = true,
         .getprogname = true,
         .memmem = gte(os, .macos, .{ .major = 10, .minor = 7, .patch = 0 }), // https://keith.github.io/xcode-man-pages/memmem.3.html
+        .memset_s = gte(os, .macos, .{ .major = 10, .minor = 9, .patch = 0 }), // https://keith.github.io/xcode-man-pages/memset_s.3.html
         .mkdtemp = true,
         .readpassphrase = true,
         .strchrnul = gte(os, .macos, .{ .major = 15, .minor = 4, .patch = 0 }), // https://keith.github.io/xcode-man-pages/strchr.3.html
@@ -279,6 +282,7 @@ fn detectFreeBSD(target: std.Target) LibcFeatures {
         .getprogname = gte(os, .freebsd, .{ .major = 4, .minor = 4, .patch = 0 }), // https://man.freebsd.org/cgi/man.cgi?query=getprogname&sektion=3
         .getrandom = gte(os, .freebsd, .{ .major = 12, .minor = 0, .patch = 0 }), // https://man.freebsd.org/cgi/man.cgi?query=getrandom&sektion=2
         .memmem = true,
+        .memset_s = gte(os, .freebsd, .{ .major = 11, .minor = 1, .patch = 0 }), // https://man.freebsd.org/cgi/man.cgi?query=memset_s&sektion=3
         .mkdtemp = true,
         .posix_fadvise = gte(os, .freebsd, .{ .major = 9, .minor = 1, .patch = 0 }), // https://man.freebsd.org/cgi/man.cgi?query=posix_fadvise&sektion=2
         .posix_fallocate = gte(os, .freebsd, .{ .major = 9, .minor = 0, .patch = 0 }), // https://man.freebsd.org/cgi/man.cgi?query=posix_fallocate&sektion=2
@@ -386,6 +390,7 @@ fn detectDragonFly(target: std.Target) LibcFeatures {
         .getpeereid = true,
         .getprogname = true,
         .memmem = true,
+        .memset_s = gte(os, .dragonfly, .{ .major = 5, .minor = 8, .patch = 0 }), // https://leaf.dragonflybsd.org/cgi/web-man?command=memset_s
         .mkdtemp = true,
         .posix_fadvise = true,
         .readpassphrase = true,
