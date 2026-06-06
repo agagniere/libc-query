@@ -25,7 +25,7 @@ pub const LibcFeatures = struct {
     // clock_gettime:     POSIX.1 (ubiquitous; macOS 10.12+)
     // copy_file_range:   glibc 2.27, FreeBSD 13.0
     // copyfile:          macOS only
-    // explicit_bzero:    glibc 2.25, FreeBSD 11.0, OpenBSD 5.5, NetBSD 7.0, DragonFly 5.0
+    // explicit_bzero:    glibc 2.25, FreeBSD 11.0, OpenBSD 5.5, NetBSD 7.0, DragonFly 5.0 (not macOS)
     // fdatasync:         POSIX.1 (ubiquitous)
     // freezero:          OpenBSD 6.2, DragonFly 5.5
     // fseeko:            POSIX.1 (ubiquitous)
@@ -51,6 +51,7 @@ pub const LibcFeatures = struct {
     // setproctitle:      FreeBSD (ancient), OpenBSD (ancient), NetBSD (ancient), DragonFly
     // strcasecmp:        POSIX.1 (ubiquitous)
     // strlcat, strlcpy:  OpenBSD 2.4, FreeBSD 3.3, NetBSD 1.4.3, glibc 2.38, musl
+    // strchrnul:         glibc 2.1.1, musl, FreeBSD 10.0, NetBSD 8.0, DragonFly 3.5, macOS 15.4
     // strncasecmp:       POSIX.1 (ubiquitous)
     // strndup:           glibc 2.2.5, FreeBSD 7.2, NetBSD 4.0, OpenBSD 4.8
     // strnlen:           POSIX.1
@@ -99,6 +100,7 @@ pub const LibcFeatures = struct {
     recallocarray: bool = false,
     setproctitle: bool = false,
     strcasecmp: bool = true,
+    strchrnul: bool = false,
     strlcat: bool = false,
     strlcpy: bool = false,
     strncasecmp: bool = true,
@@ -118,7 +120,7 @@ pub const LibcFeatures = struct {
 pub fn detect(target: std.Target) LibcFeatures {
     return switch (target.os.tag) {
         .linux => detectLinux(target),
-        .macos, .ios, .tvos, .watchos, .visionos => detectDarwin(),
+        .macos, .ios, .tvos, .watchos, .visionos => detectDarwin(target),
         .freebsd => detectFreeBSD(target),
         .openbsd => detectOpenBSD(target),
         .netbsd => detectNetBSD(target),
@@ -173,6 +175,7 @@ fn detectGlibc(target: std.Target) LibcFeatures {
         .posix_fallocate = has(glibc_abi.posix_fallocate(arch, abi), glibc),
         .ppoll = has(glibc_abi.ppoll(arch, abi), glibc),
         .reallocarray = has(glibc_abi.reallocarray(arch, abi), glibc),
+        .strchrnul = has(glibc_abi.strchrnul(arch, abi), glibc),
         .strlcat = has(glibc_abi.strlcat(arch, abi), glibc),
         .strlcpy = has(glibc_abi.strlcpy(arch, abi), glibc),
         .strndup = has(glibc_abi.strndup(arch, abi), glibc),
@@ -205,6 +208,7 @@ fn detectMusl() LibcFeatures {
         .posix_fallocate = true,
         .ppoll = true,
         .reallocarray = true,
+        .strchrnul = true,
         .strlcat = true,
         .strlcpy = true,
         .strndup = true,
@@ -218,32 +222,33 @@ fn detectMusl() LibcFeatures {
 
 // ── Darwin ────────────────────────────────────────────────────────────────────
 
-fn detectDarwin() LibcFeatures {
+fn detectDarwin(target: std.Target) LibcFeatures {
+    const os = target.os;
     return .{
         .arc4random = true,
-        .arc4random_buf = true,
-        .arc4random_uniform = true,
+        .arc4random_buf = gte(os, .macos, .{ .major = 10, .minor = 7, .patch = 0 }), // https://keith.github.io/xcode-man-pages/arc4random.3.html
+        .arc4random_uniform = gte(os, .macos, .{ .major = 10, .minor = 7, .patch = 0 }), // https://keith.github.io/xcode-man-pages/arc4random.3.html
         .asprintf = true,
-        .backtrace_symbols = true,
-        .copyfile = true,
-        .explicit_bzero = true,
+        .backtrace_symbols = gte(os, .macos, .{ .major = 10, .minor = 5, .patch = 0 }), // https://keith.github.io/xcode-man-pages/backtrace.3.html
+        .copyfile = gte(os, .macos, .{ .major = 10, .minor = 5, .patch = 0 }), // https://keith.github.io/xcode-man-pages/copyfile.3.html
         .ftruncate = true,
-        .getdelim = true,
-        .getentropy = true,
+        .getdelim = gte(os, .macos, .{ .major = 10, .minor = 7, .patch = 0 }),
+        .getentropy = gte(os, .macos, .{ .major = 10, .minor = 12, .patch = 0 }), // https://keith.github.io/xcode-man-pages/getentropy.2.html
         .getifaddrs = true,
-        .getline = true,
+        .getline = gte(os, .macos, .{ .major = 10, .minor = 7, .patch = 0 }), // https://keith.github.io/xcode-man-pages/getline.3.html
         .getpagesize = true,
         .getpeereid = true,
         .getprogname = true,
-        .memmem = true, // macOS 10.7+
+        .memmem = gte(os, .macos, .{ .major = 10, .minor = 7, .patch = 0 }), // https://keith.github.io/xcode-man-pages/memmem.3.html
         .mkdtemp = true,
         .readpassphrase = true,
+        .strchrnul = gte(os, .macos, .{ .major = 15, .minor = 4, .patch = 0 }), // https://keith.github.io/xcode-man-pages/strchr.3.html
         .strlcat = true,
         .strlcpy = true,
-        .strndup = true,
-        .strnlen = true,
+        .strndup = gte(os, .macos, .{ .major = 10, .minor = 7, .patch = 0 }), // https://keith.github.io/xcode-man-pages/strdup.3.html
+        .strnlen = gte(os, .macos, .{ .major = 10, .minor = 7, .patch = 0 }), // https://keith.github.io/xcode-man-pages/strlen.3.html
         .strsep = true,
-        .strtonum = true,
+        .strtonum = gte(os, .macos, .{ .major = 11, .minor = 0, .patch = 0 }), // https://keith.github.io/xcode-man-pages/strtonum.3.html
         .vasprintf = true,
     };
 }
@@ -280,6 +285,7 @@ fn detectFreeBSD(target: std.Target) LibcFeatures {
         .readpassphrase = true,
         .reallocarray = gte(os, .freebsd, .{ .major = 11, .minor = 0, .patch = 0 }), // https://man.freebsd.org/cgi/man.cgi?query=reallocarray&sektion=3
         .setproctitle = true,
+        .strchrnul = gte(os, .freebsd, .{ .major = 10, .minor = 0, .patch = 0 }), // https://man.freebsd.org/cgi/man.cgi?query=strchrnul&sektion=3
         .strlcat = gte(os, .freebsd, .{ .major = 3, .minor = 3, .patch = 0 }), // https://man.freebsd.org/cgi/man.cgi?query=strlcpy&sektion=3
         .strlcpy = gte(os, .freebsd, .{ .major = 3, .minor = 3, .patch = 0 }), // https://man.freebsd.org/cgi/man.cgi?query=strlcpy&sektion=3
         .strndup = gte(os, .freebsd, .{ .major = 7, .minor = 2, .patch = 0 }), // https://man.freebsd.org/cgi/man.cgi?query=strndup&sektion=3
@@ -355,6 +361,7 @@ fn detectNetBSD(target: std.Target) LibcFeatures {
         .strndup = gte(os, .netbsd, .{ .major = 4, .minor = 0, .patch = 0 }), // https://man.netbsd.org/strndup.3
         .strnlen = true,
         .strsep = true,
+        .strchrnul = gte(os, .netbsd, .{ .major = 8, .minor = 0, .patch = 0 }), // https://man.netbsd.org/strchrnul.3
         .strtonum = gte(os, .netbsd, .{ .major = 8, .minor = 0, .patch = 0 }), // https://man.netbsd.org/strtonum.3
         .vasprintf = true,
     };
@@ -385,6 +392,7 @@ fn detectDragonFly(target: std.Target) LibcFeatures {
         .reallocarray = gte(os, .dragonfly, .{ .major = 5, .minor = 5, .patch = 0 }), // https://leaf.dragonflybsd.org/cgi/web-man?command=reallocarray
         .recallocarray = gte(os, .dragonfly, .{ .major = 5, .minor = 5, .patch = 0 }), // https://leaf.dragonflybsd.org/cgi/web-man?command=recallocarray
         .setproctitle = true,
+        .strchrnul = gte(os, .dragonfly, .{ .major = 3, .minor = 5, .patch = 0 }), // https://leaf.dragonflybsd.org/cgi/web-man?command=strchrnul
         .strlcat = true,
         .strlcpy = true,
         .strndup = true,

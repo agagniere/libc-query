@@ -35,6 +35,7 @@ SYMBOLS: list[str] = [
     "memmem",
     "strlcat",
     "strlcpy",
+    "strchrnul",
     "strndup",
     "vasprintf",
     # File I/O

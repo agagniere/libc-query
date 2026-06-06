@@ -358,6 +358,38 @@ pub fn reallocarray(arch: std.Target.Cpu.Arch, abi: std.Target.Abi) ?std.Semanti
     };
 }
 
+pub fn strchrnul(arch: std.Target.Cpu.Arch, abi: std.Target.Abi) ?std.SemanticVersion {
+    return switch (arch) {
+        .aarch64 => .{ .major = 2, .minor = 17, .patch = 0 },
+        .aarch64_be => .{ .major = 2, .minor = 17, .patch = 0 },
+        .arc => .{ .major = 2, .minor = 32, .patch = 0 },
+        .arm => .{ .major = 2, .minor = 4, .patch = 0 },
+        .armeb => .{ .major = 2, .minor = 4, .patch = 0 },
+        .csky => .{ .major = 2, .minor = 29, .patch = 0 },
+        .loongarch64 => .{ .major = 2, .minor = 36, .patch = 0 },
+        .m68k => .{ .major = 2, .minor = 1, .patch = 1 },
+        .mips => .{ .major = 2, .minor = 2, .patch = 0 },
+        .mips64 => .{ .major = 2, .minor = 2, .patch = 0 },
+        .mips64el => .{ .major = 2, .minor = 2, .patch = 0 },
+        .mipsel => .{ .major = 2, .minor = 2, .patch = 0 },
+        .powerpc => .{ .major = 2, .minor = 1, .patch = 1 },
+        .powerpc64 => .{ .major = 2, .minor = 3, .patch = 0 },
+        .powerpc64le => .{ .major = 2, .minor = 17, .patch = 0 },
+        .riscv32 => .{ .major = 2, .minor = 33, .patch = 0 },
+        .riscv64 => .{ .major = 2, .minor = 27, .patch = 0 },
+        .s390x => .{ .major = 2, .minor = 2, .patch = 0 },
+        .sparc => .{ .major = 2, .minor = 1, .patch = 1 },
+        .sparc64 => .{ .major = 2, .minor = 2, .patch = 0 },
+        .x86 => .{ .major = 2, .minor = 1, .patch = 1 },
+        .x86_64 => switch (abi) {
+            .gnu => .{ .major = 2, .minor = 2, .patch = 5 },
+            .gnux32 => .{ .major = 2, .minor = 16, .patch = 0 },
+            else => null,
+        },
+        else => null,
+    };
+}
+
 pub fn strlcat(arch: std.Target.Cpu.Arch, abi: std.Target.Abi) ?std.SemanticVersion {
     _ = arch;
     _ = abi;
