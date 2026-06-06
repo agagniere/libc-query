@@ -12,7 +12,7 @@ pub const LibcConstants = struct {
     // Availability reference:
     //
     // F_FULLFSYNC: macOS only — fcntl(2) command that flushes to physical media,
-    //              stronger guarantee than F_FULLFSYNC on Linux (which has no equivalent)
+    //              stronger guarantee than fsync(2)
 
     f_fullfsync: bool = false,
 };

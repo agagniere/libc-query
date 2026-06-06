@@ -32,6 +32,8 @@ pub const LibcHeaders = struct {
     // sys/ucred.h:           FreeBSD, NetBSD, OpenBSD, macOS, DragonFly
     // termios.h:             all supported targets
     // unistd.h:              all supported targets
+    // uuid.h:                FreeBSD, NetBSD, OpenBSD, DragonFly (BSD libc built-in; on Linux use libuuid)
+    // uuid/uuid.h:           macOS
     // xlocale.h:             FreeBSD, macOS
 
     // Always present
@@ -59,6 +61,8 @@ pub const LibcHeaders = struct {
     sys_procctl_h: bool = false,
     sys_signalfd_h: bool = false,
     sys_ucred_h: bool = false,
+    uuid_h: bool = false,
+    uuid_uuid_h: bool = false,
     xlocale_h: bool = false,
 };
 
@@ -106,6 +110,7 @@ fn detectDarwin() LibcHeaders {
         .execinfo_h = true,
         .sys_event_h = true,
         .sys_ucred_h = true,
+        .uuid_uuid_h = true,
         .xlocale_h = true,
     };
 }
@@ -122,6 +127,7 @@ fn detectFreeBSD(target: std.Target) LibcHeaders {
         .sys_event_h = true,
         .sys_procctl_h = gte(target.os, .freebsd, .{ .major = 10, .minor = 1, .patch = 0 }), // https://man.freebsd.org/cgi/man.cgi?query=procctl&sektion=2
         .sys_ucred_h = true,
+        .uuid_h = true,
         .xlocale_h = true,
     };
 }
@@ -131,6 +137,7 @@ fn detectOpenBSD() LibcHeaders {
         .execinfo_h = true,
         .sys_event_h = true,
         .sys_ucred_h = true,
+        .uuid_h = true,
     };
 }
 
@@ -140,6 +147,7 @@ fn detectNetBSD() LibcHeaders {
         .execinfo_h = true,
         .sys_event_h = true,
         .sys_ucred_h = true,
+        .uuid_h = true,
     };
 }
 
@@ -148,5 +156,6 @@ fn detectDragonFly() LibcHeaders {
         .execinfo_h = true,
         .sys_event_h = true,
         .sys_ucred_h = true,
+        .uuid_h = true,
     };
 }
