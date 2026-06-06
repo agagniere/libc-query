@@ -25,6 +25,7 @@ pub const LibcFeatures = struct {
     // clock_gettime:     POSIX.1 (ubiquitous; macOS 10.12+)
     // copy_file_range:   glibc 2.27, FreeBSD 13.0
     // copyfile:          macOS only
+    // elf_aux_info:      FreeBSD 12.0, OpenBSD 7.6
     // explicit_bzero:    glibc 2.25, FreeBSD 11.0, OpenBSD 5.5, NetBSD 7.0, DragonFly 5.0 (not macOS)
     // fdatasync:         POSIX.1 (ubiquitous)
     // freezero:          OpenBSD 6.2, DragonFly 5.5
@@ -39,18 +40,22 @@ pub const LibcFeatures = struct {
     // getpeereid:        OpenBSD (ancient), FreeBSD 4.6, NetBSD 3.0, macOS, DragonFly
     // getprogname:       NetBSD 1.6, FreeBSD 4.4, OpenBSD 5.4
     // getrandom:         glibc 2.25, FreeBSD 12.0
+    // inet_aton:         POSIX.1 (ubiquitous)
     // inet_pton:         POSIX.1 (ubiquitous)
+    // localeconv_l, mbstowcs_l, wcstombs_l: xlocale extension; macOS 10.4, FreeBSD 10.3, DragonFly (not glibc/musl/OpenBSD/NetBSD)
     // memmem:            glibc (ancient), FreeBSD (ancient), OpenBSD (ancient), macOS 10.7
     // memset_s:          C11 Annex K; macOS 10.9, FreeBSD 11.1, DragonFly 5.8 (not glibc/musl/OpenBSD/NetBSD)
     // mkdtemp:           glibc (ancient), BSDs (ancient), macOS, musl
     // posix_fadvise:     glibc (ancient), FreeBSD 6.0, NetBSD 4.0, DragonFly, musl; NOT macOS/OpenBSD
     // posix_fallocate:   glibc (ancient), FreeBSD 11.0, NetBSD 7.0, musl; NOT macOS/OpenBSD
     // ppoll:             glibc 2.4, musl (Linux only)
+    // preadv, pwritev:   POSIX.1-2008 (ubiquitous; glibc 2.10, FreeBSD 6.0, OpenBSD 2.7, NetBSD 1.4, DragonFly 1.5)
     // readpassphrase:    OpenBSD (ancient), FreeBSD (ancient), NetBSD (ancient), macOS, DragonFly
     // reallocarray:      glibc 2.26, OpenBSD 5.6, FreeBSD 11.0, NetBSD 8, DragonFly 5.5
     // recallocarray:     OpenBSD 6.1, DragonFly 5.5
     // setproctitle:      FreeBSD (ancient), OpenBSD (ancient), NetBSD (ancient), DragonFly
     // strcasecmp:        POSIX.1 (ubiquitous)
+    // strerror_r:        POSIX.1 (ubiquitous)
     // strlcat, strlcpy:  OpenBSD 2.4, FreeBSD 3.3, NetBSD 1.4.3, glibc 2.38, musl
     // strchrnul:         glibc 2.1.1, musl, FreeBSD 10.0, NetBSD 8.0, DragonFly 3.5, macOS 15.4
     // strncasecmp:       POSIX.1 (ubiquitous)
@@ -64,6 +69,7 @@ pub const LibcFeatures = struct {
     // syslog:            POSIX.1 (ubiquitous)
     // timingsafe_bcmp:   OpenBSD 4.9, FreeBSD 11.1, DragonFly 5.6
     // timingsafe_memcmp: OpenBSD 5.6, FreeBSD 11.1, DragonFly 5.6
+    // uselocale:         glibc 2.3, musl, macOS 10.4, FreeBSD 9.1, OpenBSD 6.2, DragonFly (not NetBSD)
     // vasprintf:         glibc (ancient), OpenBSD 2.3, FreeBSD (ancient), NetBSD (ancient)
 
     accept4: bool = false,
@@ -75,6 +81,7 @@ pub const LibcFeatures = struct {
     clock_gettime: bool = true,
     copy_file_range: bool = false,
     copyfile: bool = false,
+    elf_aux_info: bool = false,
     explicit_bzero: bool = false,
     fdatasync: bool = true,
     freezero: bool = false,
@@ -90,19 +97,25 @@ pub const LibcFeatures = struct {
     getpeereid: bool = false,
     getprogname: bool = false,
     getrandom: bool = false,
+    inet_aton: bool = true,
     inet_pton: bool = true,
+    localeconv_l: bool = false,
+    mbstowcs_l: bool = false,
     memmem: bool = false,
     memset_s: bool = false,
     mkdtemp: bool = false,
     posix_fadvise: bool = false,
     posix_fallocate: bool = false,
     ppoll: bool = false,
+    preadv: bool = true,
+    pwritev: bool = true,
     readpassphrase: bool = false,
     reallocarray: bool = false,
     recallocarray: bool = false,
     setproctitle: bool = false,
     strcasecmp: bool = true,
     strchrnul: bool = false,
+    strerror_r: bool = true,
     strlcat: bool = false,
     strlcpy: bool = false,
     strncasecmp: bool = true,
@@ -116,7 +129,9 @@ pub const LibcFeatures = struct {
     syslog: bool = true,
     timingsafe_bcmp: bool = false,
     timingsafe_memcmp: bool = false,
+    uselocale: bool = false,
     vasprintf: bool = false,
+    wcstombs_l: bool = false,
 };
 
 pub fn detect(target: std.Target) LibcFeatures {
@@ -153,6 +168,7 @@ fn detectGlibc(target: std.Target) LibcFeatures {
     return .{
         // Always present in any glibc Zig supports (≥ 2.17)
         .asprintf = true,
+        .uselocale = true, // since glibc 2.3
         .ftruncate = true,
         .getdelim = true,
         .getline = true,
@@ -218,6 +234,7 @@ fn detectMusl() LibcFeatures {
         .strsep = true,
         .sync_file_range = true,
         .syncfs = true,
+        .uselocale = true,
         .vasprintf = true,
     };
 }
@@ -238,6 +255,8 @@ fn detectDarwin(target: std.Target) LibcFeatures {
         .getentropy = gte(os, .macos, .{ .major = 10, .minor = 12, .patch = 0 }), // https://keith.github.io/xcode-man-pages/getentropy.2.html
         .getifaddrs = true,
         .getline = gte(os, .macos, .{ .major = 10, .minor = 7, .patch = 0 }), // https://keith.github.io/xcode-man-pages/getline.3.html
+        .localeconv_l = gte(os, .macos, .{ .major = 10, .minor = 4, .patch = 0 }), // https://keith.github.io/xcode-man-pages/localeconv_l.3.html
+        .mbstowcs_l = gte(os, .macos, .{ .major = 10, .minor = 4, .patch = 0 }), // https://keith.github.io/xcode-man-pages/mbstowcs_l.3.html
         .getpagesize = true,
         .getpeereid = true,
         .getprogname = true,
@@ -252,7 +271,9 @@ fn detectDarwin(target: std.Target) LibcFeatures {
         .strnlen = gte(os, .macos, .{ .major = 10, .minor = 7, .patch = 0 }), // https://keith.github.io/xcode-man-pages/strlen.3.html
         .strsep = true,
         .strtonum = gte(os, .macos, .{ .major = 11, .minor = 0, .patch = 0 }), // https://keith.github.io/xcode-man-pages/strtonum.3.html
+        .uselocale = gte(os, .macos, .{ .major = 10, .minor = 4, .patch = 0 }), // https://keith.github.io/xcode-man-pages/uselocale.3.html
         .vasprintf = true,
+        .wcstombs_l = gte(os, .macos, .{ .major = 10, .minor = 4, .patch = 0 }), // https://keith.github.io/xcode-man-pages/wcstombs_l.3.html
     };
 }
 
@@ -271,6 +292,7 @@ fn detectFreeBSD(target: std.Target) LibcFeatures {
         .arc4random_uniform = gte(os, .freebsd, .{ .major = 8, .minor = 0, .patch = 0 }), // https://man.freebsd.org/cgi/man.cgi?query=arc4random&sektion=3
         .asprintf = true,
         .copy_file_range = gte(os, .freebsd, .{ .major = 13, .minor = 0, .patch = 0 }), // https://man.freebsd.org/cgi/man.cgi?query=copy_file_range&sektion=2
+        .elf_aux_info = gte(os, .freebsd, .{ .major = 12, .minor = 0, .patch = 0 }), // https://man.freebsd.org/cgi/man.cgi?query=elf_aux_info&sektion=3
         .explicit_bzero = gte(os, .freebsd, .{ .major = 11, .minor = 0, .patch = 0 }), // https://man.freebsd.org/cgi/man.cgi?query=explicit_bzero&sektion=3
         .ftruncate = true,
         .getdelim = gte(os, .freebsd, .{ .major = 8, .minor = 0, .patch = 0 }), // https://man.freebsd.org/cgi/man.cgi?query=getdelim&sektion=3
@@ -278,6 +300,8 @@ fn detectFreeBSD(target: std.Target) LibcFeatures {
         .getifaddrs = true,
         .getline = gte(os, .freebsd, .{ .major = 8, .minor = 0, .patch = 0 }), // https://man.freebsd.org/cgi/man.cgi?query=getdelim&sektion=3
         .getpagesize = true,
+        .localeconv_l = gte(os, .freebsd, .{ .major = 10, .minor = 3, .patch = 0 }), // https://man.freebsd.org/cgi/man.cgi?query=localeconv_l&sektion=3
+        .mbstowcs_l = gte(os, .freebsd, .{ .major = 10, .minor = 3, .patch = 0 }), // https://man.freebsd.org/cgi/man.cgi?query=mbstowcs_l&sektion=3
         .getpeereid = gte(os, .freebsd, .{ .major = 4, .minor = 6, .patch = 0 }), // https://man.freebsd.org/cgi/man.cgi?query=getpeereid&sektion=3
         .getprogname = gte(os, .freebsd, .{ .major = 4, .minor = 4, .patch = 0 }), // https://man.freebsd.org/cgi/man.cgi?query=getprogname&sektion=3
         .getrandom = gte(os, .freebsd, .{ .major = 12, .minor = 0, .patch = 0 }), // https://man.freebsd.org/cgi/man.cgi?query=getrandom&sektion=2
@@ -297,7 +321,9 @@ fn detectFreeBSD(target: std.Target) LibcFeatures {
         .strsep = true,
         .timingsafe_bcmp = gte(os, .freebsd, .{ .major = 11, .minor = 1, .patch = 0 }), // https://man.freebsd.org/cgi/man.cgi?query=timingsafe_bcmp&sektion=3
         .timingsafe_memcmp = gte(os, .freebsd, .{ .major = 11, .minor = 1, .patch = 0 }), // https://man.freebsd.org/cgi/man.cgi?query=timingsafe_bcmp&sektion=3
+        .uselocale = gte(os, .freebsd, .{ .major = 9, .minor = 1, .patch = 0 }), // https://man.freebsd.org/cgi/man.cgi?query=uselocale&sektion=3
         .vasprintf = true,
+        .wcstombs_l = gte(os, .freebsd, .{ .major = 10, .minor = 3, .patch = 0 }), // https://man.freebsd.org/cgi/man.cgi?query=wcstombs_l&sektion=3
     };
 }
 
@@ -308,6 +334,7 @@ fn detectOpenBSD(target: std.Target) LibcFeatures {
         .arc4random_buf = true, // https://man.openbsd.org/arc4random.3
         .arc4random_uniform = gte(os, .openbsd, .{ .major = 4, .minor = 2, .patch = 0 }), // https://man.openbsd.org/arc4random.3
         .asprintf = gte(os, .openbsd, .{ .major = 2, .minor = 3, .patch = 0 }), // https://man.openbsd.org/asprintf.3
+        .elf_aux_info = gte(os, .openbsd, .{ .major = 7, .minor = 6, .patch = 0 }), // https://man.openbsd.org/elf_aux_info.3
         .explicit_bzero = gte(os, .openbsd, .{ .major = 5, .minor = 5, .patch = 0 }), // https://man.openbsd.org/explicit_bzero.3
         .freezero = gte(os, .openbsd, .{ .major = 6, .minor = 2, .patch = 0 }), // https://man.openbsd.org/freezero.3
         .ftruncate = true,
@@ -332,6 +359,7 @@ fn detectOpenBSD(target: std.Target) LibcFeatures {
         .strtonum = gte(os, .openbsd, .{ .major = 3, .minor = 6, .patch = 0 }), // https://man.openbsd.org/strtonum.3
         .timingsafe_bcmp = gte(os, .openbsd, .{ .major = 4, .minor = 9, .patch = 0 }), // https://man.openbsd.org/timingsafe_bcmp.3
         .timingsafe_memcmp = gte(os, .openbsd, .{ .major = 5, .minor = 6, .patch = 0 }), // https://man.openbsd.org/timingsafe_bcmp.3
+        .uselocale = gte(os, .openbsd, .{ .major = 6, .minor = 2, .patch = 0 }), // https://man.openbsd.org/uselocale.3
         .vasprintf = gte(os, .openbsd, .{ .major = 2, .minor = 3, .patch = 0 }), // https://man.openbsd.org/asprintf.3
     };
 }
@@ -389,6 +417,8 @@ fn detectDragonFly(target: std.Target) LibcFeatures {
         .getpagesize = true,
         .getpeereid = true,
         .getprogname = true,
+        .localeconv_l = true, // https://leaf.dragonflybsd.org/cgi/web-man?command=localeconv_l
+        .mbstowcs_l = true, // https://leaf.dragonflybsd.org/cgi/web-man?command=mbstowcs_l
         .memmem = true,
         .memset_s = gte(os, .dragonfly, .{ .major = 5, .minor = 8, .patch = 0 }), // https://leaf.dragonflybsd.org/cgi/web-man?command=memset_s
         .mkdtemp = true,
@@ -405,6 +435,8 @@ fn detectDragonFly(target: std.Target) LibcFeatures {
         .strsep = true,
         .timingsafe_bcmp = gte(os, .dragonfly, .{ .major = 5, .minor = 6, .patch = 0 }), // https://leaf.dragonflybsd.org/cgi/web-man?command=timingsafe_bcmp
         .timingsafe_memcmp = gte(os, .dragonfly, .{ .major = 5, .minor = 6, .patch = 0 }), // https://leaf.dragonflybsd.org/cgi/web-man?command=timingsafe_bcmp
+        .uselocale = true, // https://leaf.dragonflybsd.org/cgi/web-man?command=uselocale
         .vasprintf = true,
+        .wcstombs_l = true, // https://leaf.dragonflybsd.org/cgi/web-man?command=wcstombs_l
     };
 }

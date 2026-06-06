@@ -6,8 +6,10 @@
 
     .paths = .{
         "glibc_abi.zig",
+        "libc_constants.zig",
         "libc_features.zig",
         "libc_headers.zig",
+        "libc_types.zig",
         "build.zig",
         "build.zig.zon",
         "LICENSE",
