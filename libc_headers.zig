@@ -15,6 +15,7 @@ pub const LibcHeaders = struct {
     // crtdefs.h:             Windows (not a tracked target)
     // execinfo.h:            glibc, FreeBSD, NetBSD, OpenBSD, macOS, DragonFly
     // getopt.h:              all supported targets
+    // ifaddrs.h:             all supported targets
     // inttypes.h:            all supported targets
     // memory.h:              all supported targets
     // stdint.h:              all supported targets
@@ -38,6 +39,7 @@ pub const LibcHeaders = struct {
 
     // Always present
     getopt_h: bool = true,
+    ifaddrs_h: bool = true,
     inttypes_h: bool = true,
     memory_h: bool = true,
     stdint_h: bool = true,
@@ -76,6 +78,7 @@ pub fn detect(target: std.Target) LibcHeaders {
         .dragonfly => detectDragonFly(),
         else => .{
             .getopt_h = false,
+            .ifaddrs_h = false,
             .inttypes_h = false,
             .memory_h = false,
             .stdint_h = false,

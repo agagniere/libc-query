@@ -24,6 +24,7 @@ HEADERS: list[str] = [
     "crtdefs.h",
     "execinfo.h",
     "getopt.h",
+    "ifaddrs.h",
     "inttypes.h",
     "memory.h",
     "stdint.h",
@@ -59,7 +60,7 @@ VERSION_GATES: dict[str, dict[str, tuple[int, int, int, str]]] = {
 
 # Darwin: Zig does not bundle the macOS SDK — hardcoded from known SDK contents.
 DARWIN_HEADERS: frozenset[str] = frozenset({
-    "copyfile.h", "execinfo.h", "getopt.h", "inttypes.h", "memory.h",
+    "copyfile.h", "execinfo.h", "getopt.h", "ifaddrs.h", "inttypes.h", "memory.h",
     "stdint.h", "stdlib.h", "string.h", "strings.h", "sys/event.h",
     "sys/stat.h", "sys/types.h", "sys/ucred.h", "termios.h", "unistd.h",
     "uuid/uuid.h", "xlocale.h",
@@ -67,7 +68,7 @@ DARWIN_HEADERS: frozenset[str] = frozenset({
 
 # DragonFly: Zig has no bundled headers — hardcoded.
 DRAGONFLY_HEADERS: frozenset[str] = frozenset({
-    "execinfo.h", "getopt.h", "inttypes.h", "memory.h", "stdint.h",
+    "execinfo.h", "getopt.h", "ifaddrs.h", "inttypes.h", "memory.h", "stdint.h",
     "stdlib.h", "string.h", "strings.h", "sys/event.h", "sys/stat.h",
     "sys/types.h", "sys/ucred.h", "termios.h", "unistd.h", "uuid.h",
 })
