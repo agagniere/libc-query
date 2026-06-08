@@ -84,6 +84,12 @@ DRAGONFLY_HEADERS: frozenset[str] = frozenset({
     "sys/stat.h", "sys/types.h", "sys/ucred.h", "termios.h", "unistd.h", "uuid.h",
 })
 
+# Windows (mingw64): scanned from Zig's bundled any-windows-any headers.
+WINDOWS_HEADERS: frozenset[str] = frozenset({
+    "crtdefs.h", "getopt.h", "inttypes.h", "memory.h", "stdint.h", "stdlib.h",
+    "string.h", "strings.h", "sys/stat.h", "sys/types.h", "unistd.h",
+})
+
 OS_DISPLAY: dict[str, str] = {
     "glibc":     "glibc",
     "musl":      "musl",
@@ -92,6 +98,7 @@ OS_DISPLAY: dict[str, str] = {
     "openbsd":   "OpenBSD",
     "darwin":    "macOS",
     "dragonfly": "DragonFly",
+    "windows":   "Windows (mingw64)",
 }
 
 
@@ -171,6 +178,7 @@ def main() -> None:
         "openbsd":   scan(inc / "generic-openbsd"),
         "darwin":    DARWIN_HEADERS,
         "dragonfly": DRAGONFLY_HEADERS,
+        "windows":   WINDOWS_HEADERS,
     }
 
     always_present = frozenset(
@@ -233,6 +241,7 @@ def main() -> None:
     print("        .openbsd => detectOpenBSD(),")
     print("        .netbsd => detectNetBSD(),")
     print("        .dragonfly => detectDragonFly(),")
+    print("        .windows => detectWindows(),")
     print("        else => .{")
     for h in sorted(always_present):
         print(f"            .{field(h)} = false,")
@@ -270,6 +279,12 @@ def main() -> None:
         for line in emit_fn(fn_name, os_key, os_hdrs, always_present):
             print(line)
         print()
+
+    print("// ── Windows (mingw64) ─────────────────────────────────────────────────────────")
+    print()
+    for line in emit_fn("detectWindows", "windows", WINDOWS_HEADERS, always_present):
+        print(line)
+    print()
 
 
 if __name__ == "__main__":

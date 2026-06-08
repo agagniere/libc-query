@@ -20,21 +20,21 @@ pub const LibcFeatures = struct {
     // arc4random:        OpenBSD 2.1, FreeBSD 2.2.6, NetBSD 10.0, glibc 2.36, musl
     // arc4random_buf:    OpenBSD 2.1, FreeBSD 8.0, NetBSD 10.0, glibc 2.36, musl
     // arc4random_uniform:OpenBSD 4.2, FreeBSD 8.0, NetBSD 10.0, glibc 2.36, musl
-    // asprintf:          glibc, OpenBSD 2.3, FreeBSD 2.2
+    // asprintf:          glibc, OpenBSD 2.3, FreeBSD 2.2, Windows (mingw64)
     // backtrace_symbols: glibc (ancient), macOS
-    // clock_gettime:     POSIX.1 (ubiquitous; macOS 10.12+)
+    // clock_gettime:     POSIX.1 (ubiquitous on POSIX targets; macOS 10.12+; not Windows)
     // copy_file_range:   glibc 2.27, FreeBSD 13.0
     // copyfile:          macOS only
     // elf_aux_info:      FreeBSD 12.0, OpenBSD 7.6
     // eventfd:           glibc 2.8, musl (Linux only; kernel 2.6.22)
     // explicit_bzero:    glibc 2.25, FreeBSD 11.0, OpenBSD 5.5, NetBSD 7.0, DragonFly 5.0 (not macOS)
-    // fdatasync:         POSIX.1 (ubiquitous)
+    // fdatasync:         POSIX.1 (all POSIX targets; not Windows)
     // freezero:          OpenBSD 6.2, DragonFly 5.5
     // fseeko:            POSIX.1 (ubiquitous)
-    // ftruncate:         4.2BSD, POSIX.1
+    // ftruncate:         4.2BSD, POSIX.1, Windows (mingw64)
     // getauxval:         glibc 2.16, musl (Linux only)
     // getdelim, getline: POSIX.1, FreeBSD 8.0, OpenBSD 5.2, NetBSD 6.0
-    // gethostbyname_r:   glibc, musl, FreeBSD 6.2, DragonFly 2.1 (not macOS/OpenBSD/NetBSD)
+    // gethostbyname_r:   glibc, musl, FreeBSD 6.2, DragonFly 2.1 (not macOS/OpenBSD/NetBSD/Windows)
     // getentropy:        OpenBSD 5.6, FreeBSD 12.0, NetBSD 10.0, glibc 2.25
     // getifaddrs:        glibc 2.3, FreeBSD (ancient), OpenBSD (ancient), NetBSD (ancient), macOS, musl
     // getopt:            POSIX.1 (ubiquitous)
@@ -43,41 +43,41 @@ pub const LibcFeatures = struct {
     // getpeereid:        OpenBSD (ancient), FreeBSD 4.6, NetBSD 3.0, macOS, DragonFly
     // getprogname:       NetBSD 1.6, FreeBSD 4.4, OpenBSD 5.4
     // getrandom:         glibc 2.25, FreeBSD 12.0
-    // inet_aton:         POSIX.1 (ubiquitous)
-    // inet_ntop:         POSIX.1 (ubiquitous)
-    // inet_pton:         POSIX.1 (ubiquitous)
-    // localeconv_l, mbstowcs_l, wcstombs_l: xlocale extension; macOS 10.4, FreeBSD 10.3, DragonFly (not glibc/musl/OpenBSD/NetBSD)
+    // inet_aton:         all POSIX targets; not Windows (use inet_pton instead)
+    // inet_ntop:         POSIX.1 (ubiquitous; Windows via ws2tcpip.h)
+    // inet_pton:         POSIX.1 (ubiquitous; Windows via ws2tcpip.h)
+    // localeconv_l, mbstowcs_l, wcstombs_l: xlocale extension; macOS 10.4, FreeBSD 10.3, DragonFly (not glibc/musl/OpenBSD/NetBSD/Windows)
     // memmem:            glibc (ancient), FreeBSD (ancient), OpenBSD (ancient), macOS 10.7
-    // memrchr:           glibc, musl, FreeBSD 6.4, OpenBSD 4.3, NetBSD, DragonFly (not macOS)
-    // memset_s:          C11 Annex K; macOS 10.9, FreeBSD 11.1, DragonFly 5.8 (not glibc/musl/OpenBSD/NetBSD)
+    // memrchr:           glibc, musl, FreeBSD 6.4, OpenBSD 4.3, NetBSD, DragonFly (not macOS/Windows)
+    // memset_s:          C11 Annex K; macOS 10.9, FreeBSD 11.1, DragonFly 5.8 (not glibc/musl/OpenBSD/NetBSD/Windows)
     // mkdtemp:           glibc (ancient), BSDs (ancient), macOS, musl
-    // pipe2:             glibc 2.9, musl, FreeBSD 10.0, OpenBSD 5.7, NetBSD 6.0, DragonFly (not macOS)
-    // posix_fadvise:     glibc (ancient), FreeBSD 6.0, NetBSD 4.0, DragonFly, musl; NOT macOS/OpenBSD
-    // posix_fallocate:   glibc (ancient), FreeBSD 11.0, NetBSD 7.0, musl; NOT macOS/OpenBSD
+    // pipe2:             glibc 2.9, musl, FreeBSD 10.0, OpenBSD 5.7, NetBSD 6.0, DragonFly (not macOS/Windows)
+    // posix_fadvise:     glibc (ancient), FreeBSD 6.0, NetBSD 4.0, DragonFly, musl; NOT macOS/OpenBSD/Windows
+    // posix_fallocate:   glibc (ancient), FreeBSD 11.0, NetBSD 7.0, musl; NOT macOS/OpenBSD/Windows
     // ppoll:             glibc 2.4, musl (Linux only)
-    // preadv, pwritev:   POSIX.1-2008 (ubiquitous; glibc 2.10, FreeBSD 6.0, OpenBSD 2.7, NetBSD 1.4, DragonFly 1.5)
+    // preadv, pwritev:   POSIX.1-2008 (all POSIX targets; glibc 2.10, FreeBSD 6.0, OpenBSD 2.7, NetBSD 1.4, DragonFly 1.5; not Windows)
     // readpassphrase:    OpenBSD (ancient), FreeBSD (ancient), NetBSD (ancient), macOS, DragonFly
     // reallocarray:      glibc 2.26, OpenBSD 5.6, FreeBSD 11.0, NetBSD 8, DragonFly 5.5
     // recallocarray:     OpenBSD 6.1, DragonFly 5.5
     // sendmmsg:          glibc 2.14, musl (kernel 3.0), FreeBSD 11.0, NetBSD 7.0, OpenBSD 7.2
     // setproctitle:      FreeBSD (ancient), OpenBSD (ancient), NetBSD (ancient), DragonFly
     // strcasecmp:        POSIX.1 (ubiquitous)
-    // strerror_r:        POSIX.1 (ubiquitous)
+    // strerror_r:        POSIX.1 (all POSIX targets; not Windows — mingw only provides a pthread.h macro)
     // strlcat, strlcpy:  OpenBSD 2.4, FreeBSD 3.3, NetBSD 1.4.3, glibc 2.38, musl
     // strchrnul:         glibc 2.1.1, musl, FreeBSD 10.0, NetBSD 8.0, DragonFly 3.5, macOS 15.4
     // strncasecmp:       POSIX.1 (ubiquitous)
     // strndup:           glibc 2.2.5, FreeBSD 7.2, NetBSD 4.0, OpenBSD 4.8
-    // strnlen:           POSIX.1
+    // strnlen:           POSIX.1, Windows (mingw64)
     // strsep:            4.4BSD, glibc (with _GNU_SOURCE)
-    // strsignal:         POSIX.1 (ubiquitous)
+    // strsignal:         POSIX.1 (all POSIX targets; not Windows)
     // strtonum:          OpenBSD 3.6, NetBSD 8
     // sync_file_range:   glibc 2.4, musl (Linux only)
     // syncfs:            glibc 2.14, musl (Linux only)
-    // syslog:            POSIX.1 (ubiquitous)
+    // syslog:            POSIX.1 (all POSIX targets; not Windows)
     // timingsafe_bcmp:   OpenBSD 4.9, FreeBSD 11.1, DragonFly 5.6
     // timingsafe_memcmp: OpenBSD 5.6, FreeBSD 11.1, DragonFly 5.6
-    // uselocale:         glibc 2.3, musl, macOS 10.4, FreeBSD 9.1, OpenBSD 6.2, DragonFly (not NetBSD)
-    // vasprintf:         glibc (ancient), OpenBSD 2.3, FreeBSD (ancient), NetBSD (ancient)
+    // uselocale:         glibc 2.3, musl, macOS 10.4, FreeBSD 9.1, OpenBSD 6.2, DragonFly (not NetBSD/Windows)
+    // vasprintf:         glibc (ancient), OpenBSD 2.3, FreeBSD (ancient), NetBSD (ancient), Windows (mingw64)
 
     accept4: bool = false,
     arc4random: bool = false,
@@ -156,6 +156,7 @@ pub fn detect(target: std.Target) LibcFeatures {
         .openbsd => detectOpenBSD(target),
         .netbsd => detectNetBSD(target),
         .dragonfly => detectDragonFly(target),
+        .windows => detectWindows(),
         else => .{},
     };
 }
@@ -476,5 +477,26 @@ fn detectDragonFly(target: std.Target) LibcFeatures {
         .uselocale = true, // https://leaf.dragonflybsd.org/cgi/web-man?command=uselocale
         .vasprintf = true,
         .wcstombs_l = true, // https://leaf.dragonflybsd.org/cgi/web-man?command=wcstombs_l
+    };
+}
+
+// ── Windows (mingw64) ─────────────────────────────────────────────────────────
+
+fn detectWindows() LibcFeatures {
+    return .{
+        // Defaults false that are present on Windows via mingw64
+        .asprintf = true,
+        .ftruncate = true,
+        .strnlen = true,
+        .vasprintf = true,
+        // Defaults true that are absent on Windows
+        .clock_gettime = false, // only in pthread_time.h (winpthreads), not in time.h
+        .fdatasync = false,
+        .inet_aton = false,
+        .preadv = false,
+        .pwritev = false,
+        .strerror_r = false, // mingw pthread.h only provides a wrapper macro
+        .strsignal = false,
+        .syslog = false,
     };
 }
