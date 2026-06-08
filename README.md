@@ -25,7 +25,9 @@ Covers **glibc**, **musl**, **macOS**, **FreeBSD**, **OpenBSD**, **NetBSD**, **D
 **`libc_types`** — struct field and typedef presence: `socklen_t` (all supported targets),
 `struct_sockaddr_sa_len` (BSDs and macOS), `struct_tm_tm_zone` (all POSIX targets).
 
-**`libc_constants`** — constant/declaration availability: `f_fullfsync` (macOS only).
+**`libc_constants`** — constant/declaration availability: `clock_monotonic` (all POSIX targets),
+`clock_monotonic_raw` (Linux and Darwin), `f_fullfsync` (macOS only),
+`msg_nosignal` (Linux, BSDs, DragonFly, macOS 14.0+), `o_nonblock` (all POSIX targets).
 
 For glibc, function availability is per-architecture and derived from Zig's bundled `abilists` file.
 
