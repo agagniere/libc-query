@@ -23,12 +23,16 @@ HEADERS: list[str] = [
     "atomic.h",
     "copyfile.h",
     "crtdefs.h",
+    "dirent.h",
     "execinfo.h",
     "fcntl.h",
     "getopt.h",
     "ifaddrs.h",
     "inttypes.h",
+    "io.h",
+    "libgen.h",
     "linux/tcp.h",
+    "locale.h",
     "memory.h",
     "net/if.h",
     "netdb.h",
@@ -37,15 +41,19 @@ HEADERS: list[str] = [
     "netinet/udp.h",
     "poll.h",
     "pwd.h",
+    "stdatomic.h",
+    "stdbool.h",
     "stdint.h",
     "stdlib.h",
     "string.h",
     "strings.h",
+    "stropts.h",
     "sys/epoll.h",
     "sys/event.h",
     "sys/eventfd.h",
     "sys/filio.h",
     "sys/ioctl.h",
+    "sys/param.h",
     "sys/personality.h",
     "sys/prctl.h",
     "sys/procctl.h",
@@ -57,12 +65,23 @@ HEADERS: list[str] = [
     "sys/types.h",
     "sys/ucred.h",
     "sys/un.h",
+    "sys/utime.h",
     "termios.h",
     "unistd.h",
+    "utime.h",
     "uuid.h",
     "uuid/uuid.h",
     "xlocale.h",
 ]
+
+# Headers provided by the compiler (clang/gcc builtins), not by the libc.
+# They are universally available in all Zig-supported compilation environments
+# even when absent from the libc's own include directory (e.g. glibc and mingw64
+# don't ship stdatomic.h or stdbool.h in their include tree — the compiler does).
+COMPILER_PROVIDED_HEADERS: frozenset[str] = frozenset({
+    "stdatomic.h",  # C11
+    "stdbool.h",    # C99
+})
 
 # Version-gated headers: present on the OS but only from a given release.
 # {os_key: {header: (major, minor, patch, man_url)}}
@@ -82,37 +101,41 @@ LINUX_EXTRA_HEADERS: frozenset[str] = frozenset({
 
 # Darwin: Zig does not bundle the macOS SDK — hardcoded from known SDK contents.
 DARWIN_HEADERS: frozenset[str] = frozenset({
-    "arpa/inet.h", "copyfile.h", "execinfo.h", "fcntl.h", "getopt.h", "ifaddrs.h",
-    "inttypes.h", "memory.h", "net/if.h", "netdb.h", "netinet/in.h", "netinet/tcp.h",
-    "netinet/udp.h", "poll.h", "pwd.h", "stdint.h", "stdlib.h", "string.h", "strings.h",
-    "sys/event.h", "sys/filio.h", "sys/ioctl.h", "sys/resource.h", "sys/select.h",
-    "sys/sockio.h", "sys/stat.h", "sys/types.h", "sys/ucred.h", "sys/un.h", "termios.h",
-    "unistd.h", "uuid/uuid.h", "xlocale.h",
+    "arpa/inet.h", "copyfile.h", "dirent.h", "execinfo.h", "fcntl.h", "getopt.h",
+    "ifaddrs.h", "inttypes.h", "libgen.h", "locale.h", "memory.h", "net/if.h", "netdb.h",
+    "netinet/in.h", "netinet/tcp.h", "netinet/udp.h", "poll.h", "pwd.h", "stdint.h",
+    "stdlib.h", "string.h", "strings.h", "sys/event.h", "sys/filio.h", "sys/ioctl.h",
+    "sys/param.h", "sys/resource.h", "sys/select.h", "sys/sockio.h", "sys/stat.h",
+    "sys/types.h", "sys/ucred.h", "sys/un.h", "termios.h", "unistd.h", "utime.h",
+    "uuid/uuid.h", "xlocale.h",
 })
 
 # DragonFly: Zig has no bundled headers — hardcoded.
 DRAGONFLY_HEADERS: frozenset[str] = frozenset({
-    "arpa/inet.h", "execinfo.h", "fcntl.h", "getopt.h", "ifaddrs.h", "inttypes.h",
-    "memory.h", "net/if.h", "netdb.h", "netinet/in.h", "netinet/tcp.h", "netinet/udp.h",
-    "poll.h", "pwd.h", "stdint.h", "stdlib.h", "string.h", "strings.h", "sys/event.h",
-    "sys/filio.h", "sys/ioctl.h", "sys/resource.h", "sys/select.h", "sys/sockio.h",
-    "sys/stat.h", "sys/types.h", "sys/ucred.h", "sys/un.h", "termios.h", "unistd.h",
+    "arpa/inet.h", "dirent.h", "execinfo.h", "fcntl.h", "getopt.h", "ifaddrs.h",
+    "inttypes.h", "libgen.h", "locale.h", "memory.h", "net/if.h", "netdb.h",
+    "netinet/in.h", "netinet/tcp.h", "netinet/udp.h", "poll.h", "pwd.h", "stdint.h",
+    "stdlib.h", "string.h", "strings.h", "sys/event.h", "sys/filio.h", "sys/ioctl.h",
+    "sys/param.h", "sys/resource.h", "sys/select.h", "sys/sockio.h", "sys/stat.h",
+    "sys/types.h", "sys/ucred.h", "sys/un.h", "termios.h", "unistd.h", "utime.h",
     "uuid.h",
 })
 
 # Windows (mingw64): scanned from Zig's bundled any-windows-any headers.
 WINDOWS_HEADERS: frozenset[str] = frozenset({
-    "crtdefs.h", "fcntl.h", "getopt.h", "inttypes.h", "memory.h", "stdint.h", "stdlib.h",
-    "string.h", "strings.h", "sys/stat.h", "sys/types.h", "unistd.h",
+    "crtdefs.h", "dirent.h", "fcntl.h", "getopt.h", "inttypes.h", "io.h", "libgen.h",
+    "locale.h", "memory.h", "stdint.h", "stdlib.h", "string.h", "strings.h",
+    "sys/param.h", "sys/stat.h", "sys/types.h", "sys/utime.h", "unistd.h", "utime.h",
 })
 
-# WASI: scanned from Zig's bundled wasm-wasi-musl headers.
+# WASI: scanned from Zig's bundled wasm-wasi-musl and wasi-libc musl top-half headers.
 # Covers both preview 1 (0.1.x) and preview 2 (0.2.x); the header set is the same for
 # both — preview 2 only adds socket function implementations, not new headers.
 WASI_HEADERS: frozenset[str] = frozenset({
-    "arpa/inet.h", "fcntl.h", "ifaddrs.h", "inttypes.h", "netdb.h", "netinet/in.h",
-    "poll.h", "stdlib.h", "string.h", "sys/ioctl.h", "sys/resource.h", "sys/select.h",
-    "sys/stat.h", "sys/types.h", "sys/un.h", "unistd.h",
+    "arpa/inet.h", "dirent.h", "fcntl.h", "ifaddrs.h", "inttypes.h", "locale.h",
+    "netdb.h", "netinet/in.h", "poll.h", "stdlib.h", "string.h", "sys/ioctl.h",
+    "sys/param.h", "sys/resource.h", "sys/select.h", "sys/stat.h", "sys/types.h",
+    "sys/un.h", "unistd.h",
 })
 
 OS_DISPLAY: dict[str, str] = {
@@ -197,15 +220,15 @@ def main() -> None:
     inc = lib_dir / "libc" / "include"
 
     target_headers: dict[str, frozenset[str]] = {
-        "glibc":     scan(inc / "generic-glibc") | LINUX_EXTRA_HEADERS,
-        "musl":      scan(lib_dir / "libc" / "musl" / "include") | LINUX_EXTRA_HEADERS,
-        "freebsd":   scan(inc / "generic-freebsd"),
-        "netbsd":    scan(inc / "generic-netbsd"),
-        "openbsd":   scan(inc / "generic-openbsd"),
-        "darwin":    DARWIN_HEADERS,
-        "dragonfly": DRAGONFLY_HEADERS,
-        "windows":   WINDOWS_HEADERS,
-        "wasi":      WASI_HEADERS,
+        "glibc":     scan(inc / "generic-glibc") | LINUX_EXTRA_HEADERS | COMPILER_PROVIDED_HEADERS,
+        "musl":      scan(lib_dir / "libc" / "musl" / "include") | LINUX_EXTRA_HEADERS | COMPILER_PROVIDED_HEADERS,
+        "freebsd":   scan(inc / "generic-freebsd") | COMPILER_PROVIDED_HEADERS,
+        "netbsd":    scan(inc / "generic-netbsd") | COMPILER_PROVIDED_HEADERS,
+        "openbsd":   scan(inc / "generic-openbsd") | COMPILER_PROVIDED_HEADERS,
+        "darwin":    DARWIN_HEADERS | COMPILER_PROVIDED_HEADERS,
+        "dragonfly": DRAGONFLY_HEADERS | COMPILER_PROVIDED_HEADERS,
+        "windows":   WINDOWS_HEADERS | COMPILER_PROVIDED_HEADERS,
+        "wasi":      WASI_HEADERS | COMPILER_PROVIDED_HEADERS,
     }
 
     always_present = frozenset(
@@ -286,7 +309,7 @@ def main() -> None:
 
     print("// ── Darwin ────────────────────────────────────────────────────────────────────")
     print()
-    for line in emit_fn("detectDarwin", "darwin", DARWIN_HEADERS, always_present):
+    for line in emit_fn("detectDarwin", "darwin", target_headers["darwin"], always_present):
         print(line)
     print()
 
@@ -298,25 +321,25 @@ def main() -> None:
         print("}")
         print()
 
-    for fn_name, os_key, os_hdrs in [
-        ("detectFreeBSD",  "freebsd",  target_headers["freebsd"]),
-        ("detectOpenBSD",  "openbsd",  target_headers["openbsd"]),
-        ("detectNetBSD",   "netbsd",   target_headers["netbsd"]),
-        ("detectDragonFly","dragonfly", DRAGONFLY_HEADERS),
+    for fn_name, os_key in [
+        ("detectFreeBSD",  "freebsd"),
+        ("detectOpenBSD",  "openbsd"),
+        ("detectNetBSD",   "netbsd"),
+        ("detectDragonFly","dragonfly"),
     ]:
-        for line in emit_fn(fn_name, os_key, os_hdrs, always_present):
+        for line in emit_fn(fn_name, os_key, target_headers[os_key], always_present):
             print(line)
         print()
 
     print("// ── Windows (mingw64) ─────────────────────────────────────────────────────────")
     print()
-    for line in emit_fn("detectWindows", "windows", WINDOWS_HEADERS, always_present):
+    for line in emit_fn("detectWindows", "windows", target_headers["windows"], always_present):
         print(line)
     print()
 
     print("// ── WASI ──────────────────────────────────────────────────────────────────────")
     print()
-    for line in emit_fn("detectWASI", "wasi", WASI_HEADERS, always_present):
+    for line in emit_fn("detectWASI", "wasi", target_headers["wasi"], always_present):
         print(line)
     print()
 

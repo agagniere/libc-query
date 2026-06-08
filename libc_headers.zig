@@ -14,12 +14,16 @@ pub const LibcHeaders = struct {
     // atomic.h:              NetBSD
     // copyfile.h:            macOS
     // crtdefs.h:             Windows (mingw64)
+    // dirent.h:              all supported targets
     // execinfo.h:            glibc, FreeBSD, NetBSD, OpenBSD, macOS, DragonFly
     // fcntl.h:               all supported targets
     // getopt.h:              glibc, musl, FreeBSD, NetBSD, OpenBSD, macOS, DragonFly, Windows (mingw64)
     // ifaddrs.h:             glibc, musl, FreeBSD, NetBSD, OpenBSD, macOS, DragonFly, WASI
     // inttypes.h:            all supported targets
+    // io.h:                  Windows (mingw64)
+    // libgen.h:              glibc, musl, FreeBSD, NetBSD, OpenBSD, macOS, DragonFly, Windows (mingw64)
     // linux/tcp.h:           glibc, musl
+    // locale.h:              all supported targets
     // memory.h:              glibc, musl, FreeBSD, NetBSD, OpenBSD, macOS, DragonFly, Windows (mingw64)
     // net/if.h:              glibc, musl, FreeBSD, NetBSD, OpenBSD, macOS, DragonFly
     // netdb.h:               glibc, musl, FreeBSD, NetBSD, OpenBSD, macOS, DragonFly, WASI
@@ -28,15 +32,19 @@ pub const LibcHeaders = struct {
     // netinet/udp.h:         glibc, musl, FreeBSD, NetBSD, OpenBSD, macOS, DragonFly
     // poll.h:                glibc, musl, FreeBSD, NetBSD, OpenBSD, macOS, DragonFly, WASI
     // pwd.h:                 glibc, musl, FreeBSD, NetBSD, OpenBSD, macOS, DragonFly
+    // stdatomic.h:           all supported targets
+    // stdbool.h:             all supported targets
     // stdint.h:              glibc, musl, FreeBSD, NetBSD, OpenBSD, macOS, DragonFly, Windows (mingw64)
     // stdlib.h:              all supported targets
     // string.h:              all supported targets
     // strings.h:             glibc, musl, FreeBSD, NetBSD, OpenBSD, macOS, DragonFly, Windows (mingw64)
+    // stropts.h:             musl
     // sys/epoll.h:           glibc, musl
     // sys/event.h:           FreeBSD, NetBSD, OpenBSD, macOS, DragonFly
     // sys/eventfd.h:         glibc, musl, FreeBSD, NetBSD
     // sys/filio.h:           FreeBSD, NetBSD, OpenBSD, macOS, DragonFly
     // sys/ioctl.h:           glibc, musl, FreeBSD, NetBSD, OpenBSD, macOS, DragonFly, WASI
+    // sys/param.h:           all supported targets
     // sys/personality.h:     glibc, musl
     // sys/prctl.h:           glibc, musl
     // sys/procctl.h:         FreeBSD 10.1+
@@ -48,17 +56,24 @@ pub const LibcHeaders = struct {
     // sys/types.h:           all supported targets
     // sys/ucred.h:           FreeBSD, NetBSD, OpenBSD, macOS, DragonFly
     // sys/un.h:              glibc, musl, FreeBSD, NetBSD, OpenBSD, macOS, DragonFly, WASI
+    // sys/utime.h:           Windows (mingw64)
     // termios.h:             glibc, musl, FreeBSD, NetBSD, OpenBSD, macOS, DragonFly
     // unistd.h:              all supported targets
+    // utime.h:               glibc, musl, FreeBSD, NetBSD, OpenBSD, macOS, DragonFly, Windows (mingw64)
     // uuid.h:                FreeBSD, NetBSD, OpenBSD, DragonFly
     // uuid/uuid.h:           macOS
     // xlocale.h:             FreeBSD, macOS
 
     // Always present
+    dirent_h: bool = true,
     fcntl_h: bool = true,
     inttypes_h: bool = true,
+    locale_h: bool = true,
+    stdatomic_h: bool = true,
+    stdbool_h: bool = true,
     stdlib_h: bool = true,
     string_h: bool = true,
+    sys_param_h: bool = true,
     sys_stat_h: bool = true,
     sys_types_h: bool = true,
     unistd_h: bool = true,
@@ -71,6 +86,8 @@ pub const LibcHeaders = struct {
     execinfo_h: bool = false,
     getopt_h: bool = false,
     ifaddrs_h: bool = false,
+    io_h: bool = false,
+    libgen_h: bool = false,
     linux_tcp_h: bool = false,
     memory_h: bool = false,
     net_if_h: bool = false,
@@ -82,6 +99,7 @@ pub const LibcHeaders = struct {
     pwd_h: bool = false,
     stdint_h: bool = false,
     strings_h: bool = false,
+    stropts_h: bool = false,
     sys_epoll_h: bool = false,
     sys_event_h: bool = false,
     sys_eventfd_h: bool = false,
@@ -96,7 +114,9 @@ pub const LibcHeaders = struct {
     sys_sockio_h: bool = false,
     sys_ucred_h: bool = false,
     sys_un_h: bool = false,
+    sys_utime_h: bool = false,
     termios_h: bool = false,
+    utime_h: bool = false,
     uuid_h: bool = false,
     uuid_uuid_h: bool = false,
     xlocale_h: bool = false,
@@ -113,10 +133,15 @@ pub fn detect(target: std.Target) LibcHeaders {
         .windows => detectWindows(),
         .wasi => detectWASI(),
         else => .{
+            .dirent_h = false,
             .fcntl_h = false,
             .inttypes_h = false,
+            .locale_h = false,
+            .stdatomic_h = false,
+            .stdbool_h = false,
             .stdlib_h = false,
             .string_h = false,
+            .sys_param_h = false,
             .sys_stat_h = false,
             .sys_types_h = false,
             .unistd_h = false,
@@ -132,6 +157,7 @@ fn detectLinux(target: std.Target) LibcHeaders {
         .execinfo_h = !target.abi.isMusl(),
         .getopt_h = true,
         .ifaddrs_h = true,
+        .libgen_h = true,
         .linux_tcp_h = true,
         .memory_h = true,
         .net_if_h = true,
@@ -143,6 +169,7 @@ fn detectLinux(target: std.Target) LibcHeaders {
         .pwd_h = true,
         .stdint_h = true,
         .strings_h = true,
+        .stropts_h = target.abi.isMusl(),
         .sys_epoll_h = true,
         .sys_eventfd_h = true,
         .sys_ioctl_h = true,
@@ -153,6 +180,7 @@ fn detectLinux(target: std.Target) LibcHeaders {
         .sys_signalfd_h = true,
         .sys_un_h = true,
         .termios_h = true,
+        .utime_h = true,
     };
 }
 
@@ -165,6 +193,7 @@ fn detectDarwin() LibcHeaders {
         .execinfo_h = true,
         .getopt_h = true,
         .ifaddrs_h = true,
+        .libgen_h = true,
         .memory_h = true,
         .net_if_h = true,
         .netdb_h = true,
@@ -184,6 +213,7 @@ fn detectDarwin() LibcHeaders {
         .sys_ucred_h = true,
         .sys_un_h = true,
         .termios_h = true,
+        .utime_h = true,
         .uuid_uuid_h = true,
         .xlocale_h = true,
     };
@@ -201,6 +231,7 @@ fn detectFreeBSD(target: std.Target) LibcHeaders {
         .execinfo_h = true,
         .getopt_h = true,
         .ifaddrs_h = true,
+        .libgen_h = true,
         .memory_h = true,
         .net_if_h = true,
         .netdb_h = true,
@@ -222,6 +253,7 @@ fn detectFreeBSD(target: std.Target) LibcHeaders {
         .sys_ucred_h = true,
         .sys_un_h = true,
         .termios_h = true,
+        .utime_h = true,
         .uuid_h = true,
         .xlocale_h = true,
     };
@@ -233,6 +265,7 @@ fn detectOpenBSD() LibcHeaders {
         .execinfo_h = true,
         .getopt_h = true,
         .ifaddrs_h = true,
+        .libgen_h = true,
         .memory_h = true,
         .net_if_h = true,
         .netdb_h = true,
@@ -252,6 +285,7 @@ fn detectOpenBSD() LibcHeaders {
         .sys_ucred_h = true,
         .sys_un_h = true,
         .termios_h = true,
+        .utime_h = true,
         .uuid_h = true,
     };
 }
@@ -263,6 +297,7 @@ fn detectNetBSD() LibcHeaders {
         .execinfo_h = true,
         .getopt_h = true,
         .ifaddrs_h = true,
+        .libgen_h = true,
         .memory_h = true,
         .net_if_h = true,
         .netdb_h = true,
@@ -283,6 +318,7 @@ fn detectNetBSD() LibcHeaders {
         .sys_ucred_h = true,
         .sys_un_h = true,
         .termios_h = true,
+        .utime_h = true,
         .uuid_h = true,
     };
 }
@@ -293,6 +329,7 @@ fn detectDragonFly() LibcHeaders {
         .execinfo_h = true,
         .getopt_h = true,
         .ifaddrs_h = true,
+        .libgen_h = true,
         .memory_h = true,
         .net_if_h = true,
         .netdb_h = true,
@@ -312,6 +349,7 @@ fn detectDragonFly() LibcHeaders {
         .sys_ucred_h = true,
         .sys_un_h = true,
         .termios_h = true,
+        .utime_h = true,
         .uuid_h = true,
     };
 }
@@ -322,9 +360,13 @@ fn detectWindows() LibcHeaders {
     return .{
         .crtdefs_h = true,
         .getopt_h = true,
+        .io_h = true,
+        .libgen_h = true,
         .memory_h = true,
         .stdint_h = true,
         .strings_h = true,
+        .sys_utime_h = true,
+        .utime_h = true,
     };
 }
 
