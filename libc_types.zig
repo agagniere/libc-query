@@ -11,16 +11,21 @@ const std = @import("std");
 pub const LibcTypes = struct {
     // Availability reference:
     //
-    // sa_family_t:            POSIX.1-2001 (all POSIX targets including WASI; not Windows)
-    // socklen_t:              POSIX.1-2001 (all supported targets including WASI; Windows via ws2tcpip.h)
-    // struct sockaddr.sa_len: BSDs, macOS (not Linux/Windows/WASI — explicit length passed separately)
-    // struct tm.tm_zone:      BSD/glibc extension (all POSIX targets; not Windows/WASI;
-    //                         requires _GNU_SOURCE or _BSD_SOURCE on glibc/musl)
-    // suseconds_t:            POSIX.1-2001 (all POSIX targets including WASI; not Windows)
+    // sa_family_t:             POSIX.1-2001 (all POSIX targets including WASI; not Windows)
+    // socklen_t:               POSIX.1-2001 (all supported targets including WASI; Windows via ws2tcpip.h)
+    // struct sockaddr.sa_len:  BSDs, macOS (not Linux/Windows/WASI — explicit length passed separately)
+    // struct sockaddr_storage: RFC 3493, POSIX.1-2001 (all named targets; Windows via winsock2.h; WASI)
+    // struct timeval:          4.2BSD, POSIX.1 (all named targets; Windows via sys/time.h or winsock2.h;
+    //                          note: Windows uses long fields, not time_t/suseconds_t)
+    // struct tm.tm_zone:       BSD/glibc extension (all POSIX targets; not Windows/WASI;
+    //                          requires _GNU_SOURCE or _BSD_SOURCE on glibc/musl)
+    // suseconds_t:             POSIX.1-2001 (all POSIX targets including WASI; not Windows)
 
     sa_family_t: bool = true,
     socklen_t: bool = true,
     struct_sockaddr_sa_len: bool = false,
+    struct_sockaddr_storage: bool = true,
+    struct_timeval: bool = true,
     /// struct tm { tm_zone }
     struct_tm_tm_zone: bool = true,
     suseconds_t: bool = true,

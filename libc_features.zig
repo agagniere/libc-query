@@ -52,6 +52,7 @@ pub const LibcFeatures = struct {
     // getpass_r:         NetBSD 7.0
     // getpeereid:        OpenBSD (ancient), FreeBSD 4.6, NetBSD 3.0, macOS, DragonFly
     // getpeername, getsockname: 4.2BSD, POSIX.1 (all named targets; WASI 0.2+)
+    // gettimeofday:      4.2BSD, POSIX.1-2001/XSI (all named targets; Windows via sys/time.h; WASI)
     // getprogname:       NetBSD 1.6, FreeBSD 4.4, OpenBSD 5.4
     // getpwuid:          Version 7 AT&T UNIX, POSIX.1 (all POSIX targets; not Windows/WASI)
     // getpwuid_r:        POSIX.1c (all POSIX targets; NetBSD 3.0, FreeBSD 5.1; not Windows/WASI)
@@ -67,6 +68,7 @@ pub const LibcFeatures = struct {
     // memrchr:           glibc, musl, FreeBSD 6.4, OpenBSD 4.3, NetBSD, DragonFly (not macOS/Windows)
     // memset_s:          C11 Annex K; macOS 10.9, FreeBSD 11.1, DragonFly 5.8 (not glibc/musl/OpenBSD/NetBSD/Windows)
     // mkdtemp:           glibc (ancient), BSDs (ancient), macOS, musl
+    // opendir:           POSIX.1-2001, 4.2BSD (all named targets; WASI via preopens; Windows mingw64)
     // pipe:              Version 3 AT&T UNIX, POSIX.1 (all POSIX targets; not Windows/WASI)
     // pipe2:             glibc 2.9, musl, FreeBSD 10.0, OpenBSD 5.7, NetBSD 6.0, DragonFly (not macOS/Windows)
     // poll:              System V.3 UNIX, POSIX.1 (glibc/musl, NetBSD 1.3, FreeBSD ancient; not Windows)
@@ -75,21 +77,29 @@ pub const LibcFeatures = struct {
     // ppoll:             glibc 2.4, musl (Linux only)
     // preadv, pwritev:   POSIX.1-2008 (all POSIX targets; glibc 2.10, FreeBSD 6.0, OpenBSD 2.7, NetBSD 1.4, DragonFly 1.5; not Windows)
     // readpassphrase:    OpenBSD (ancient), FreeBSD (ancient), NetBSD (ancient), macOS, DragonFly
+    // recv:              4.2BSD, POSIX.1 (all named targets; Windows via winsock2.h; WASI 0.2+;
+    //                    symbol exists in WASI 0.1 but socket() is unavailable there)
     // reallocarray:      glibc 2.26, OpenBSD 5.6, FreeBSD 11.0, NetBSD 8, DragonFly 5.5
     // recallocarray:     OpenBSD 6.1, DragonFly 5.5
     // sched_yield:       POSIX.1b-1993 (all POSIX targets; OpenBSD 4.2; not Windows)
+    // select:            4.2BSD, POSIX.1 (all named targets; WASI; Windows via winsock2.h)
+    // send:              4.2BSD, POSIX.1 (all named targets; Windows via winsock2.h; WASI 0.2+;
+    //                    symbol exists in WASI 0.1 but socket() is unavailable there)
     // sendmmsg:          glibc 2.14, musl (kernel 3.0), FreeBSD 11.0, NetBSD 7.0, OpenBSD 7.2
     // sendmsg:           4.2BSD, POSIX.1 (all POSIX targets; not Windows/WASI)
+    // setlocale:         C89/C90 (all named targets)
     // setmode:           4.3BSD-Reno (OpenBSD), 4.4BSD (FreeBSD, NetBSD, DragonFly); also Windows (mingw64); not Linux/macOS
     // setproctitle:      FreeBSD (ancient), OpenBSD (ancient), NetBSD (ancient), DragonFly
     // sigaction:         POSIX.1-1990 (all POSIX targets; not Windows/WASI)
     // siginterrupt:      4.3BSD, POSIX.1-2001 (glibc 2.12 for feature-test-macro path); obsolete in POSIX.1-2008
     // sigsetjmp:         POSIX.1-2001 (all POSIX targets; not Windows/WASI)
     // signal:            Version 4 AT&T UNIX, C89 (all named targets; WASI)
+    // snprintf:          C99 (all named targets)
     // socket:            4.1cBSD (OpenBSD), 4.2BSD (others) (all named targets; Windows via winsock2.h; WASI 0.2+)
     // socketpair:        4.2BSD, POSIX.1 (all POSIX targets; not Windows/WASI)
     // strcasecmp:        POSIX.1 (ubiquitous)
     // strchrnul:         glibc 2.1.1, musl, FreeBSD 10.0, NetBSD 8.0, DragonFly 3.5, macOS 15.4
+    // strdup:            POSIX.1-2008 (all named targets; C23)
     // strerror_r:        POSIX.1 (all POSIX targets; not Windows — mingw only provides a pthread.h macro)
     // strlcat, strlcpy:  OpenBSD 2.4, FreeBSD 3.3, NetBSD 1.4.3, glibc 2.38, musl
     // strncasecmp:       POSIX.1 (ubiquitous)
@@ -150,6 +160,7 @@ pub const LibcFeatures = struct {
     getrandom: bool = false,
     getrlimit: bool = true,
     getsockname: bool = true,
+    gettimeofday: bool = true,
     gmtime_r: bool = true,
     if_nametoindex: bool = true,
     inet_aton: bool = true,
@@ -162,6 +173,7 @@ pub const LibcFeatures = struct {
     memrchr: bool = false,
     memset_s: bool = false,
     mkdtemp: bool = false,
+    opendir: bool = true,
     pipe: bool = true,
     pipe2: bool = false,
     poll: bool = true,
@@ -173,9 +185,13 @@ pub const LibcFeatures = struct {
     readpassphrase: bool = false,
     reallocarray: bool = false,
     recallocarray: bool = false,
+    recv: bool = true,
     sched_yield: bool = true,
+    select: bool = true,
+    send: bool = true,
     sendmmsg: bool = false,
     sendmsg: bool = true,
+    setlocale: bool = true,
     setmode: bool = false,
     setproctitle: bool = false,
     setrlimit: bool = true,
@@ -183,10 +199,12 @@ pub const LibcFeatures = struct {
     siginterrupt: bool = true,
     sigsetjmp: bool = true,
     signal: bool = true,
+    snprintf: bool = true,
     socket: bool = true,
     socketpair: bool = true,
     strcasecmp: bool = true,
     strchrnul: bool = false,
+    strdup: bool = true,
     strerror_r: bool = true,
     strlcat: bool = false,
     strlcpy: bool = false,
@@ -625,6 +643,9 @@ fn detectWASI(target: std.Target) LibcFeatures {
         .strsep = true,
         .vasprintf = true,
         // Socket functions available only from WASI 0.2+ (preview 2)
+        // recv/send: symbols exist in preview 1 but are useless without socket(), which is preview-2-only
+        .recv = wasip2,
+        .send = wasip2,
         .socket = wasip2,
         .getpeername = wasip2,
         .getsockname = wasip2,
