@@ -2,27 +2,28 @@
 
 Compile-time detection of libc symbol and header availability for Zig cross-compilation targets.
 
-Covers **glibc**, **musl**, **macOS**, **FreeBSD**, **OpenBSD**, **NetBSD**, and **DragonFly**.
+Covers **glibc**, **musl**, **macOS**, **FreeBSD**, **OpenBSD**, **NetBSD**, **DragonFly**, and **Windows (mingw64)**.
 
 ## What is tracked
 
 **`libc_features`** — optional libc functions:
 `accept4`, `arc4random`, `arc4random_buf`, `arc4random_uniform`, `asprintf`, `backtrace_symbols`,
-`clock_gettime`, `copy_file_range`, `copyfile`, `elf_aux_info`, `explicit_bzero`, `fdatasync`,
-`freezero`, `fseeko`, `ftruncate`, `getauxval`, `getdelim`, `getentropy`, `getifaddrs`, `getline`,
-`getopt`, `getpagesize`, `getpeereid`, `getprogname`, `getrandom`, `inet_aton`, `inet_pton`,
-`localeconv_l`, `mbstowcs_l`, `memmem`, `memset_s`, `mkdtemp`, `posix_fadvise`, `posix_fallocate`,
-`ppoll`, `preadv`, `pwritev`, `readpassphrase`, `reallocarray`, `recallocarray`, `setproctitle`,
+`clock_gettime`, `copy_file_range`, `copyfile`, `elf_aux_info`, `eventfd`, `explicit_bzero`,
+`fdatasync`, `freezero`, `fseeko`, `ftruncate`, `getauxval`, `getdelim`, `getentropy`, `getifaddrs`,
+`gethostbyname_r`, `getline`, `getopt`, `getpagesize`, `getpass_r`, `getpeereid`, `getprogname`,
+`getrandom`, `inet_aton`, `inet_ntop`, `inet_pton`, `localeconv_l`, `mbstowcs_l`, `memmem`,
+`memrchr`, `memset_s`, `mkdtemp`, `pipe2`, `posix_fadvise`, `posix_fallocate`, `ppoll`, `preadv`,
+`pwritev`, `readpassphrase`, `reallocarray`, `recallocarray`, `sendmmsg`, `setproctitle`,
 `strcasecmp`, `strchrnul`, `strerror_r`, `strlcat`, `strlcpy`, `strncasecmp`, `strndup`, `strnlen`,
 `strsep`, `strsignal`, `strtonum`, `sync_file_range`, `syncfs`, `syslog`, `timingsafe_bcmp`,
 `timingsafe_memcmp`, `uselocale`, `vasprintf`, `wcstombs_l`.
 
-**`libc_headers`** — system headers: standard POSIX/C99 headers (always `true` on supported targets)
-plus OS-specific ones such as `sys/epoll.h`, `sys/event.h`, `sys/ucred.h`, `execinfo.h`,
-`xlocale.h`, `copyfile.h`, and others.
+**`libc_headers`** — system headers: headers always present on all supported targets (e.g. `stdlib.h`,
+`string.h`, `sys/stat.h`) plus OS-specific ones such as `sys/epoll.h`, `sys/event.h`, `sys/ucred.h`,
+`execinfo.h`, `xlocale.h`, `copyfile.h`, `crtdefs.h`, and others.
 
-**`libc_types`** — struct field presence: `struct_sockaddr_sa_len` (BSDs and macOS),
-`struct_tm_tm_zone` (all supported targets).
+**`libc_types`** — struct field and typedef presence: `socklen_t` (all supported targets),
+`struct_sockaddr_sa_len` (BSDs and macOS), `struct_tm_tm_zone` (all POSIX targets).
 
 **`libc_constants`** — constant/declaration availability: `f_fullfsync` (macOS only).
 
