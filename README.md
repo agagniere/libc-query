@@ -19,11 +19,13 @@ Covers **glibc**, **musl**, **macOS**, **FreeBSD**, **OpenBSD**, **NetBSD**, **D
 `timingsafe_memcmp`, `uselocale`, `vasprintf`, `wcstombs_l`.
 
 **`libc_headers`** — system headers: headers always present on all supported targets (e.g. `stdlib.h`,
-`string.h`, `sys/stat.h`) plus OS-specific ones such as `sys/epoll.h`, `sys/event.h`, `sys/ucred.h`,
-`execinfo.h`, `xlocale.h`, `copyfile.h`, `crtdefs.h`, and others.
+`string.h`, `fcntl.h`) plus OS-specific ones such as `sys/epoll.h`, `sys/event.h`, `sys/ucred.h`,
+`netinet/tcp.h`, `sys/ioctl.h`, `sys/resource.h`, `linux/tcp.h` (Linux only), `crtdefs.h` (Windows
+only), and others.
 
-**`libc_types`** — struct field and typedef presence: `socklen_t` (all supported targets),
-`struct_sockaddr_sa_len` (BSDs and macOS), `struct_tm_tm_zone` (all POSIX targets).
+**`libc_types`** — struct field and typedef presence: `sa_family_t`, `socklen_t`, `suseconds_t`
+(all POSIX targets), `struct_sockaddr_sa_len` (BSDs and macOS), `struct_tm_tm_zone` (all POSIX
+targets).
 
 **`libc_constants`** — constant/declaration availability: `clock_monotonic` (all POSIX targets),
 `clock_monotonic_raw` (Linux and Darwin), `f_fullfsync` (macOS only),
