@@ -57,6 +57,7 @@ pub const LibcHeaders = struct {
     // sys/ucred.h:           FreeBSD, NetBSD, OpenBSD, macOS, DragonFly
     // sys/un.h:              glibc, musl, FreeBSD, NetBSD, OpenBSD, macOS, DragonFly, WASI
     // sys/utime.h:           Windows (mingw64)
+    // sys/videoio.h:         NetBSD, OpenBSD
     // termios.h:             glibc, musl, FreeBSD, NetBSD, OpenBSD, macOS, DragonFly
     // unistd.h:              all supported targets
     // utime.h:               glibc, musl, FreeBSD, NetBSD, OpenBSD, macOS, DragonFly, Windows (mingw64)
@@ -115,6 +116,7 @@ pub const LibcHeaders = struct {
     sys_ucred_h: bool = false,
     sys_un_h: bool = false,
     sys_utime_h: bool = false,
+    sys_videoio_h: bool = false,
     termios_h: bool = false,
     utime_h: bool = false,
     uuid_h: bool = false,
@@ -284,6 +286,7 @@ fn detectOpenBSD() LibcHeaders {
         .sys_sockio_h = true,
         .sys_ucred_h = true,
         .sys_un_h = true,
+        .sys_videoio_h = true,
         .termios_h = true,
         .utime_h = true,
         .uuid_h = true,
@@ -317,6 +320,7 @@ fn detectNetBSD() LibcHeaders {
         .sys_sockio_h = true,
         .sys_ucred_h = true,
         .sys_un_h = true,
+        .sys_videoio_h = true,
         .termios_h = true,
         .utime_h = true,
         .uuid_h = true,

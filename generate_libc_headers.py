@@ -66,6 +66,7 @@ HEADERS: list[str] = [
     "sys/ucred.h",
     "sys/un.h",
     "sys/utime.h",
+    "sys/videoio.h",
     "termios.h",
     "unistd.h",
     "utime.h",
