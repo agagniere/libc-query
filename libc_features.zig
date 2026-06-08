@@ -26,6 +26,7 @@ pub const LibcFeatures = struct {
     // copy_file_range:   glibc 2.27, FreeBSD 13.0
     // copyfile:          macOS only
     // elf_aux_info:      FreeBSD 12.0, OpenBSD 7.6
+    // eventfd:           glibc 2.8, musl (Linux only; kernel 2.6.22)
     // explicit_bzero:    glibc 2.25, FreeBSD 11.0, OpenBSD 5.5, NetBSD 7.0, DragonFly 5.0 (not macOS)
     // fdatasync:         POSIX.1 (ubiquitous)
     // freezero:          OpenBSD 6.2, DragonFly 5.5
@@ -33,19 +34,24 @@ pub const LibcFeatures = struct {
     // ftruncate:         4.2BSD, POSIX.1
     // getauxval:         glibc 2.16, musl (Linux only)
     // getdelim, getline: POSIX.1, FreeBSD 8.0, OpenBSD 5.2, NetBSD 6.0
+    // gethostbyname_r:   glibc, musl, FreeBSD 6.2, DragonFly 2.1 (not macOS/OpenBSD/NetBSD)
     // getentropy:        OpenBSD 5.6, FreeBSD 12.0, NetBSD 10.0, glibc 2.25
     // getifaddrs:        glibc 2.3, FreeBSD (ancient), OpenBSD (ancient), NetBSD (ancient), macOS, musl
     // getopt:            POSIX.1 (ubiquitous)
     // getpagesize:       4.2BSD, SUSv1
+    // getpass_r:         NetBSD 7.0
     // getpeereid:        OpenBSD (ancient), FreeBSD 4.6, NetBSD 3.0, macOS, DragonFly
     // getprogname:       NetBSD 1.6, FreeBSD 4.4, OpenBSD 5.4
     // getrandom:         glibc 2.25, FreeBSD 12.0
     // inet_aton:         POSIX.1 (ubiquitous)
+    // inet_ntop:         POSIX.1 (ubiquitous)
     // inet_pton:         POSIX.1 (ubiquitous)
     // localeconv_l, mbstowcs_l, wcstombs_l: xlocale extension; macOS 10.4, FreeBSD 10.3, DragonFly (not glibc/musl/OpenBSD/NetBSD)
     // memmem:            glibc (ancient), FreeBSD (ancient), OpenBSD (ancient), macOS 10.7
+    // memrchr:           glibc, musl, FreeBSD 6.4, OpenBSD 4.3, NetBSD, DragonFly (not macOS)
     // memset_s:          C11 Annex K; macOS 10.9, FreeBSD 11.1, DragonFly 5.8 (not glibc/musl/OpenBSD/NetBSD)
     // mkdtemp:           glibc (ancient), BSDs (ancient), macOS, musl
+    // pipe2:             glibc 2.9, musl, FreeBSD 10.0, OpenBSD 5.7, NetBSD 6.0, DragonFly (not macOS)
     // posix_fadvise:     glibc (ancient), FreeBSD 6.0, NetBSD 4.0, DragonFly, musl; NOT macOS/OpenBSD
     // posix_fallocate:   glibc (ancient), FreeBSD 11.0, NetBSD 7.0, musl; NOT macOS/OpenBSD
     // ppoll:             glibc 2.4, musl (Linux only)
@@ -53,6 +59,7 @@ pub const LibcFeatures = struct {
     // readpassphrase:    OpenBSD (ancient), FreeBSD (ancient), NetBSD (ancient), macOS, DragonFly
     // reallocarray:      glibc 2.26, OpenBSD 5.6, FreeBSD 11.0, NetBSD 8, DragonFly 5.5
     // recallocarray:     OpenBSD 6.1, DragonFly 5.5
+    // sendmmsg:          glibc 2.14, musl (kernel 3.0), FreeBSD 11.0, NetBSD 7.0, OpenBSD 7.2
     // setproctitle:      FreeBSD (ancient), OpenBSD (ancient), NetBSD (ancient), DragonFly
     // strcasecmp:        POSIX.1 (ubiquitous)
     // strerror_r:        POSIX.1 (ubiquitous)
@@ -82,6 +89,7 @@ pub const LibcFeatures = struct {
     copy_file_range: bool = false,
     copyfile: bool = false,
     elf_aux_info: bool = false,
+    eventfd: bool = false,
     explicit_bzero: bool = false,
     fdatasync: bool = true,
     freezero: bool = false,
@@ -94,24 +102,30 @@ pub const LibcFeatures = struct {
     getline: bool = false,
     getopt: bool = true,
     getpagesize: bool = false,
+    getpass_r: bool = false,
     getpeereid: bool = false,
     getprogname: bool = false,
+    gethostbyname_r: bool = false,
     getrandom: bool = false,
     inet_aton: bool = true,
+    inet_ntop: bool = true,
     inet_pton: bool = true,
     localeconv_l: bool = false,
     mbstowcs_l: bool = false,
     memmem: bool = false,
+    memrchr: bool = false,
     memset_s: bool = false,
     mkdtemp: bool = false,
     posix_fadvise: bool = false,
     posix_fallocate: bool = false,
+    pipe2: bool = false,
     ppoll: bool = false,
     preadv: bool = true,
     pwritev: bool = true,
     readpassphrase: bool = false,
     reallocarray: bool = false,
     recallocarray: bool = false,
+    sendmmsg: bool = false,
     setproctitle: bool = false,
     strcasecmp: bool = true,
     strchrnul: bool = false,
@@ -168,6 +182,11 @@ fn detectGlibc(target: std.Target) LibcFeatures {
     return .{
         // Always present in any glibc Zig supports (≥ 2.17)
         .asprintf = true,
+        .eventfd = true, // since glibc 2.8 / kernel 2.6.22
+        .gethostbyname_r = true,
+        .memrchr = true,
+        .pipe2 = true, // since glibc 2.9
+        .sendmmsg = true, // since glibc 2.14 / kernel 3.0
         .uselocale = true, // since glibc 2.3
         .ftruncate = true,
         .getdelim = true,
@@ -232,6 +251,11 @@ fn detectMusl() LibcFeatures {
         .strndup = true,
         .strnlen = true,
         .strsep = true,
+        .eventfd = true,
+        .gethostbyname_r = true,
+        .memrchr = true,
+        .pipe2 = true,
+        .sendmmsg = true,
         .sync_file_range = true,
         .syncfs = true,
         .uselocale = true,
@@ -294,6 +318,7 @@ fn detectFreeBSD(target: std.Target) LibcFeatures {
         .copy_file_range = gte(os, .freebsd, .{ .major = 13, .minor = 0, .patch = 0 }), // https://man.freebsd.org/cgi/man.cgi?query=copy_file_range&sektion=2
         .elf_aux_info = gte(os, .freebsd, .{ .major = 12, .minor = 0, .patch = 0 }), // https://man.freebsd.org/cgi/man.cgi?query=elf_aux_info&sektion=3
         .explicit_bzero = gte(os, .freebsd, .{ .major = 11, .minor = 0, .patch = 0 }), // https://man.freebsd.org/cgi/man.cgi?query=explicit_bzero&sektion=3
+        .gethostbyname_r = gte(os, .freebsd, .{ .major = 6, .minor = 2, .patch = 0 }), // https://man.freebsd.org/cgi/man.cgi?query=gethostbyname_r&sektion=3
         .ftruncate = true,
         .getdelim = gte(os, .freebsd, .{ .major = 8, .minor = 0, .patch = 0 }), // https://man.freebsd.org/cgi/man.cgi?query=getdelim&sektion=3
         .getentropy = gte(os, .freebsd, .{ .major = 12, .minor = 0, .patch = 0 }), // https://man.freebsd.org/cgi/man.cgi?query=getentropy&sektion=3
@@ -306,8 +331,11 @@ fn detectFreeBSD(target: std.Target) LibcFeatures {
         .getprogname = gte(os, .freebsd, .{ .major = 4, .minor = 4, .patch = 0 }), // https://man.freebsd.org/cgi/man.cgi?query=getprogname&sektion=3
         .getrandom = gte(os, .freebsd, .{ .major = 12, .minor = 0, .patch = 0 }), // https://man.freebsd.org/cgi/man.cgi?query=getrandom&sektion=2
         .memmem = true,
+        .memrchr = gte(os, .freebsd, .{ .major = 6, .minor = 4, .patch = 0 }), // https://man.freebsd.org/cgi/man.cgi?query=memrchr&sektion=3
         .memset_s = gte(os, .freebsd, .{ .major = 11, .minor = 1, .patch = 0 }), // https://man.freebsd.org/cgi/man.cgi?query=memset_s&sektion=3
         .mkdtemp = true,
+        .pipe2 = gte(os, .freebsd, .{ .major = 10, .minor = 0, .patch = 0 }), // https://man.freebsd.org/cgi/man.cgi?query=pipe2&sektion=2
+        .sendmmsg = gte(os, .freebsd, .{ .major = 11, .minor = 0, .patch = 0 }), // https://man.freebsd.org/cgi/man.cgi?query=sendmmsg&sektion=2
         .posix_fadvise = gte(os, .freebsd, .{ .major = 9, .minor = 1, .patch = 0 }), // https://man.freebsd.org/cgi/man.cgi?query=posix_fadvise&sektion=2
         .posix_fallocate = gte(os, .freebsd, .{ .major = 9, .minor = 0, .patch = 0 }), // https://man.freebsd.org/cgi/man.cgi?query=posix_fallocate&sektion=2
         .readpassphrase = true,
@@ -346,7 +374,9 @@ fn detectOpenBSD(target: std.Target) LibcFeatures {
         .getpeereid = true,
         .getprogname = gte(os, .openbsd, .{ .major = 5, .minor = 4, .patch = 0 }), // https://man.openbsd.org/getprogname.3
         .memmem = true,
+        .memrchr = gte(os, .openbsd, .{ .major = 4, .minor = 3, .patch = 0 }), // https://man.openbsd.org/memrchr.3
         .mkdtemp = true,
+        .pipe2 = gte(os, .openbsd, .{ .major = 5, .minor = 7, .patch = 0 }), // https://man.openbsd.org/pipe2.2
         .readpassphrase = true,
         .reallocarray = gte(os, .openbsd, .{ .major = 5, .minor = 6, .patch = 0 }), // https://man.openbsd.org/reallocarray.3
         .recallocarray = gte(os, .openbsd, .{ .major = 6, .minor = 1, .patch = 0 }), // https://man.openbsd.org/reallocarray.3
@@ -357,6 +387,7 @@ fn detectOpenBSD(target: std.Target) LibcFeatures {
         .strnlen = true,
         .strsep = true,
         .strtonum = gte(os, .openbsd, .{ .major = 3, .minor = 6, .patch = 0 }), // https://man.openbsd.org/strtonum.3
+        .sendmmsg = gte(os, .openbsd, .{ .major = 7, .minor = 2, .patch = 0 }), // https://man.openbsd.org/sendmmsg.2
         .timingsafe_bcmp = gte(os, .openbsd, .{ .major = 4, .minor = 9, .patch = 0 }), // https://man.openbsd.org/timingsafe_bcmp.3
         .timingsafe_memcmp = gte(os, .openbsd, .{ .major = 5, .minor = 6, .patch = 0 }), // https://man.openbsd.org/timingsafe_bcmp.3
         .uselocale = gte(os, .openbsd, .{ .major = 6, .minor = 2, .patch = 0 }), // https://man.openbsd.org/uselocale.3
@@ -381,8 +412,12 @@ fn detectNetBSD(target: std.Target) LibcFeatures {
         .getpagesize = true,
         .getpeereid = gte(os, .netbsd, .{ .major = 5, .minor = 0, .patch = 0 }), // https://man.netbsd.org/getpeereid.3
         .getprogname = true, // https://man.netbsd.org/getprogname.3
+        .getpass_r = gte(os, .netbsd, .{ .major = 7, .minor = 0, .patch = 0 }), // https://man.netbsd.org/getpass_r.3
         .memmem = true,
+        .memrchr = true, // https://man.netbsd.org/memrchr.3
         .mkdtemp = true,
+        .pipe2 = gte(os, .netbsd, .{ .major = 6, .minor = 0, .patch = 0 }), // https://man.netbsd.org/pipe2.2
+        .sendmmsg = gte(os, .netbsd, .{ .major = 7, .minor = 0, .patch = 0 }), // https://man.netbsd.org/sendmmsg.2
         .posix_fadvise = gte(os, .netbsd, .{ .major = 4, .minor = 0, .patch = 0 }), // https://man.netbsd.org/posix_fadvise.2
         .posix_fallocate = gte(os, .netbsd, .{ .major = 7, .minor = 0, .patch = 0 }), // https://man.netbsd.org/posix_fallocate.3
         .readpassphrase = true,
@@ -419,7 +454,9 @@ fn detectDragonFly(target: std.Target) LibcFeatures {
         .getprogname = true,
         .localeconv_l = true, // https://leaf.dragonflybsd.org/cgi/web-man?command=localeconv_l
         .mbstowcs_l = true, // https://leaf.dragonflybsd.org/cgi/web-man?command=mbstowcs_l
+        .gethostbyname_r = gte(os, .dragonfly, .{ .major = 2, .minor = 1, .patch = 0 }), // https://leaf.dragonflybsd.org/cgi/web-man?command=gethostbyname_r
         .memmem = true,
+        .memrchr = true, // https://leaf.dragonflybsd.org/cgi/web-man?command=memrchr
         .memset_s = gte(os, .dragonfly, .{ .major = 5, .minor = 8, .patch = 0 }), // https://leaf.dragonflybsd.org/cgi/web-man?command=memset_s
         .mkdtemp = true,
         .posix_fadvise = true,
@@ -435,6 +472,7 @@ fn detectDragonFly(target: std.Target) LibcFeatures {
         .strsep = true,
         .timingsafe_bcmp = gte(os, .dragonfly, .{ .major = 5, .minor = 6, .patch = 0 }), // https://leaf.dragonflybsd.org/cgi/web-man?command=timingsafe_bcmp
         .timingsafe_memcmp = gte(os, .dragonfly, .{ .major = 5, .minor = 6, .patch = 0 }), // https://leaf.dragonflybsd.org/cgi/web-man?command=timingsafe_bcmp
+        .pipe2 = true, // https://leaf.dragonflybsd.org/cgi/web-man?command=pipe2
         .uselocale = true, // https://leaf.dragonflybsd.org/cgi/web-man?command=uselocale
         .vasprintf = true,
         .wcstombs_l = true, // https://leaf.dragonflybsd.org/cgi/web-man?command=wcstombs_l

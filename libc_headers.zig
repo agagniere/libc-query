@@ -10,6 +10,7 @@ const std = @import("std");
 pub const LibcHeaders = struct {
     // Availability reference:
     //
+    // arpa/inet.h:           all supported targets
     // atomic.h:              NetBSD
     // copyfile.h:            macOS
     // crtdefs.h:             Windows (not a tracked target)
@@ -18,16 +19,24 @@ pub const LibcHeaders = struct {
     // ifaddrs.h:             all supported targets
     // inttypes.h:            all supported targets
     // memory.h:              all supported targets
+    // net/if.h:              all supported targets
+    // netdb.h:               all supported targets
+    // netinet/in.h:          all supported targets
+    // poll.h:                all supported targets
+    // pwd.h:                 all supported targets
     // stdint.h:              all supported targets
     // stdlib.h:              all supported targets
     // string.h:              all supported targets
     // strings.h:             all supported targets
     // sys/epoll.h:           glibc, musl
     // sys/event.h:           FreeBSD, NetBSD, OpenBSD, macOS, DragonFly
+    // sys/eventfd.h:         glibc, musl, FreeBSD, NetBSD
+    // sys/filio.h:           FreeBSD, NetBSD, OpenBSD, macOS, DragonFly
     // sys/personality.h:     glibc, musl
     // sys/prctl.h:           glibc, musl
     // sys/procctl.h:         FreeBSD 10.1+
     // sys/signalfd.h:        glibc, musl
+    // sys/sockio.h:          FreeBSD, NetBSD, OpenBSD, macOS, DragonFly
     // sys/stat.h:            all supported targets
     // sys/types.h:           all supported targets
     // sys/ucred.h:           FreeBSD, NetBSD, OpenBSD, macOS, DragonFly
@@ -38,10 +47,16 @@ pub const LibcHeaders = struct {
     // xlocale.h:             FreeBSD, macOS
 
     // Always present
+    arpa_inet_h: bool = true,
     getopt_h: bool = true,
     ifaddrs_h: bool = true,
     inttypes_h: bool = true,
     memory_h: bool = true,
+    net_if_h: bool = true,
+    netdb_h: bool = true,
+    netinet_in_h: bool = true,
+    poll_h: bool = true,
+    pwd_h: bool = true,
     stdint_h: bool = true,
     stdlib_h: bool = true,
     string_h: bool = true,
@@ -58,10 +73,13 @@ pub const LibcHeaders = struct {
     execinfo_h: bool = false,
     sys_epoll_h: bool = false,
     sys_event_h: bool = false,
+    sys_eventfd_h: bool = false,
+    sys_filio_h: bool = false,
     sys_personality_h: bool = false,
     sys_prctl_h: bool = false,
     sys_procctl_h: bool = false,
     sys_signalfd_h: bool = false,
+    sys_sockio_h: bool = false,
     sys_ucred_h: bool = false,
     uuid_h: bool = false,
     uuid_uuid_h: bool = false,
@@ -77,10 +95,16 @@ pub fn detect(target: std.Target) LibcHeaders {
         .netbsd => detectNetBSD(),
         .dragonfly => detectDragonFly(),
         else => .{
+            .arpa_inet_h = false,
             .getopt_h = false,
             .ifaddrs_h = false,
             .inttypes_h = false,
             .memory_h = false,
+            .net_if_h = false,
+            .netdb_h = false,
+            .netinet_in_h = false,
+            .poll_h = false,
+            .pwd_h = false,
             .stdint_h = false,
             .stdlib_h = false,
             .string_h = false,
@@ -99,6 +123,7 @@ fn detectLinux(target: std.Target) LibcHeaders {
     return .{
         .execinfo_h = !target.abi.isMusl(),
         .sys_epoll_h = true,
+        .sys_eventfd_h = true,
         .sys_personality_h = true,
         .sys_prctl_h = true,
         .sys_signalfd_h = true,
@@ -112,6 +137,8 @@ fn detectDarwin() LibcHeaders {
         .copyfile_h = true,
         .execinfo_h = true,
         .sys_event_h = true,
+        .sys_filio_h = true,
+        .sys_sockio_h = true,
         .sys_ucred_h = true,
         .uuid_uuid_h = true,
         .xlocale_h = true,
@@ -128,7 +155,10 @@ fn detectFreeBSD(target: std.Target) LibcHeaders {
     return .{
         .execinfo_h = true,
         .sys_event_h = true,
+        .sys_eventfd_h = true,
+        .sys_filio_h = true,
         .sys_procctl_h = gte(target.os, .freebsd, .{ .major = 10, .minor = 1, .patch = 0 }), // https://man.freebsd.org/cgi/man.cgi?query=procctl&sektion=2
+        .sys_sockio_h = true,
         .sys_ucred_h = true,
         .uuid_h = true,
         .xlocale_h = true,
@@ -139,6 +169,8 @@ fn detectOpenBSD() LibcHeaders {
     return .{
         .execinfo_h = true,
         .sys_event_h = true,
+        .sys_filio_h = true,
+        .sys_sockio_h = true,
         .sys_ucred_h = true,
         .uuid_h = true,
     };
@@ -149,6 +181,9 @@ fn detectNetBSD() LibcHeaders {
         .atomic_h = true,
         .execinfo_h = true,
         .sys_event_h = true,
+        .sys_eventfd_h = true,
+        .sys_filio_h = true,
+        .sys_sockio_h = true,
         .sys_ucred_h = true,
         .uuid_h = true,
     };
@@ -158,6 +193,8 @@ fn detectDragonFly() LibcHeaders {
     return .{
         .execinfo_h = true,
         .sys_event_h = true,
+        .sys_filio_h = true,
+        .sys_sockio_h = true,
         .sys_ucred_h = true,
         .uuid_h = true,
     };

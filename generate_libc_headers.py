@@ -19,6 +19,7 @@ from pathlib import Path
 
 # Headers to track. Add any header a C package commonly probes for.
 HEADERS: list[str] = [
+    "arpa/inet.h",
     "atomic.h",
     "copyfile.h",
     "crtdefs.h",
@@ -27,16 +28,24 @@ HEADERS: list[str] = [
     "ifaddrs.h",
     "inttypes.h",
     "memory.h",
+    "net/if.h",
+    "netdb.h",
+    "netinet/in.h",
+    "poll.h",
+    "pwd.h",
     "stdint.h",
     "stdlib.h",
     "string.h",
     "strings.h",
     "sys/epoll.h",
     "sys/event.h",
+    "sys/eventfd.h",
+    "sys/filio.h",
     "sys/personality.h",
     "sys/prctl.h",
     "sys/procctl.h",
     "sys/signalfd.h",
+    "sys/sockio.h",
     "sys/stat.h",
     "sys/types.h",
     "sys/ucred.h",
@@ -60,17 +69,19 @@ VERSION_GATES: dict[str, dict[str, tuple[int, int, int, str]]] = {
 
 # Darwin: Zig does not bundle the macOS SDK — hardcoded from known SDK contents.
 DARWIN_HEADERS: frozenset[str] = frozenset({
-    "copyfile.h", "execinfo.h", "getopt.h", "ifaddrs.h", "inttypes.h", "memory.h",
-    "stdint.h", "stdlib.h", "string.h", "strings.h", "sys/event.h",
-    "sys/stat.h", "sys/types.h", "sys/ucred.h", "termios.h", "unistd.h",
+    "arpa/inet.h", "copyfile.h", "execinfo.h", "getopt.h", "ifaddrs.h", "inttypes.h",
+    "memory.h", "net/if.h", "netdb.h", "netinet/in.h", "poll.h", "pwd.h",
+    "stdint.h", "stdlib.h", "string.h", "strings.h", "sys/event.h", "sys/filio.h",
+    "sys/sockio.h", "sys/stat.h", "sys/types.h", "sys/ucred.h", "termios.h", "unistd.h",
     "uuid/uuid.h", "xlocale.h",
 })
 
 # DragonFly: Zig has no bundled headers — hardcoded.
 DRAGONFLY_HEADERS: frozenset[str] = frozenset({
-    "execinfo.h", "getopt.h", "ifaddrs.h", "inttypes.h", "memory.h", "stdint.h",
-    "stdlib.h", "string.h", "strings.h", "sys/event.h", "sys/stat.h",
-    "sys/types.h", "sys/ucred.h", "termios.h", "unistd.h", "uuid.h",
+    "arpa/inet.h", "execinfo.h", "getopt.h", "ifaddrs.h", "inttypes.h", "memory.h",
+    "net/if.h", "netdb.h", "netinet/in.h", "poll.h", "pwd.h", "stdint.h",
+    "stdlib.h", "string.h", "strings.h", "sys/event.h", "sys/filio.h", "sys/sockio.h",
+    "sys/stat.h", "sys/types.h", "sys/ucred.h", "termios.h", "unistd.h", "uuid.h",
 })
 
 OS_DISPLAY: dict[str, str] = {
