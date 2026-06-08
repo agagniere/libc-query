@@ -24,13 +24,17 @@ HEADERS: list[str] = [
     "copyfile.h",
     "crtdefs.h",
     "execinfo.h",
+    "fcntl.h",
     "getopt.h",
     "ifaddrs.h",
     "inttypes.h",
+    "linux/tcp.h",
     "memory.h",
     "net/if.h",
     "netdb.h",
     "netinet/in.h",
+    "netinet/tcp.h",
+    "netinet/udp.h",
     "poll.h",
     "pwd.h",
     "stdint.h",
@@ -41,14 +45,18 @@ HEADERS: list[str] = [
     "sys/event.h",
     "sys/eventfd.h",
     "sys/filio.h",
+    "sys/ioctl.h",
     "sys/personality.h",
     "sys/prctl.h",
     "sys/procctl.h",
+    "sys/resource.h",
+    "sys/select.h",
     "sys/signalfd.h",
     "sys/sockio.h",
     "sys/stat.h",
     "sys/types.h",
     "sys/ucred.h",
+    "sys/un.h",
     "termios.h",
     "unistd.h",
     "uuid.h",
@@ -67,26 +75,34 @@ VERSION_GATES: dict[str, dict[str, tuple[int, int, int, str]]] = {
     },
 }
 
+# Linux kernel headers in any-linux-any/ (not in per-ABI generic-glibc/ or musl/include/).
+LINUX_EXTRA_HEADERS: frozenset[str] = frozenset({
+    "linux/tcp.h",
+})
+
 # Darwin: Zig does not bundle the macOS SDK — hardcoded from known SDK contents.
 DARWIN_HEADERS: frozenset[str] = frozenset({
-    "arpa/inet.h", "copyfile.h", "execinfo.h", "getopt.h", "ifaddrs.h", "inttypes.h",
-    "memory.h", "net/if.h", "netdb.h", "netinet/in.h", "poll.h", "pwd.h",
-    "stdint.h", "stdlib.h", "string.h", "strings.h", "sys/event.h", "sys/filio.h",
-    "sys/sockio.h", "sys/stat.h", "sys/types.h", "sys/ucred.h", "termios.h", "unistd.h",
-    "uuid/uuid.h", "xlocale.h",
+    "arpa/inet.h", "copyfile.h", "execinfo.h", "fcntl.h", "getopt.h", "ifaddrs.h",
+    "inttypes.h", "memory.h", "net/if.h", "netdb.h", "netinet/in.h", "netinet/tcp.h",
+    "netinet/udp.h", "poll.h", "pwd.h", "stdint.h", "stdlib.h", "string.h", "strings.h",
+    "sys/event.h", "sys/filio.h", "sys/ioctl.h", "sys/resource.h", "sys/select.h",
+    "sys/sockio.h", "sys/stat.h", "sys/types.h", "sys/ucred.h", "sys/un.h", "termios.h",
+    "unistd.h", "uuid/uuid.h", "xlocale.h",
 })
 
 # DragonFly: Zig has no bundled headers — hardcoded.
 DRAGONFLY_HEADERS: frozenset[str] = frozenset({
-    "arpa/inet.h", "execinfo.h", "getopt.h", "ifaddrs.h", "inttypes.h", "memory.h",
-    "net/if.h", "netdb.h", "netinet/in.h", "poll.h", "pwd.h", "stdint.h",
-    "stdlib.h", "string.h", "strings.h", "sys/event.h", "sys/filio.h", "sys/sockio.h",
-    "sys/stat.h", "sys/types.h", "sys/ucred.h", "termios.h", "unistd.h", "uuid.h",
+    "arpa/inet.h", "execinfo.h", "fcntl.h", "getopt.h", "ifaddrs.h", "inttypes.h",
+    "memory.h", "net/if.h", "netdb.h", "netinet/in.h", "netinet/tcp.h", "netinet/udp.h",
+    "poll.h", "pwd.h", "stdint.h", "stdlib.h", "string.h", "strings.h", "sys/event.h",
+    "sys/filio.h", "sys/ioctl.h", "sys/resource.h", "sys/select.h", "sys/sockio.h",
+    "sys/stat.h", "sys/types.h", "sys/ucred.h", "sys/un.h", "termios.h", "unistd.h",
+    "uuid.h",
 })
 
 # Windows (mingw64): scanned from Zig's bundled any-windows-any headers.
 WINDOWS_HEADERS: frozenset[str] = frozenset({
-    "crtdefs.h", "getopt.h", "inttypes.h", "memory.h", "stdint.h", "stdlib.h",
+    "crtdefs.h", "fcntl.h", "getopt.h", "inttypes.h", "memory.h", "stdint.h", "stdlib.h",
     "string.h", "strings.h", "sys/stat.h", "sys/types.h", "unistd.h",
 })
 
@@ -171,8 +187,8 @@ def main() -> None:
     inc = lib_dir / "libc" / "include"
 
     target_headers: dict[str, frozenset[str]] = {
-        "glibc":     scan(inc / "generic-glibc"),
-        "musl":      scan(lib_dir / "libc" / "musl" / "include"),
+        "glibc":     scan(inc / "generic-glibc") | LINUX_EXTRA_HEADERS,
+        "musl":      scan(lib_dir / "libc" / "musl" / "include") | LINUX_EXTRA_HEADERS,
         "freebsd":   scan(inc / "generic-freebsd"),
         "netbsd":    scan(inc / "generic-netbsd"),
         "openbsd":   scan(inc / "generic-openbsd"),
