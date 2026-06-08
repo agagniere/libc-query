@@ -7,16 +7,21 @@ Covers **glibc**, **musl**, **macOS**, **FreeBSD**, **OpenBSD**, **NetBSD**, **D
 ## What is tracked
 
 **`libc_features`** — optional libc functions:
-`accept4`, `arc4random`, `arc4random_buf`, `arc4random_uniform`, `asprintf`, `backtrace_symbols`,
-`clock_gettime`, `copy_file_range`, `copyfile`, `elf_aux_info`, `eventfd`, `explicit_bzero`,
-`fdatasync`, `freezero`, `fseeko`, `ftruncate`, `getauxval`, `getdelim`, `getentropy`, `getifaddrs`,
-`gethostbyname_r`, `getline`, `getopt`, `getpagesize`, `getpass_r`, `getpeereid`, `getprogname`,
-`getrandom`, `inet_aton`, `inet_ntop`, `inet_pton`, `localeconv_l`, `mbstowcs_l`, `memmem`,
-`memrchr`, `memset_s`, `mkdtemp`, `pipe2`, `posix_fadvise`, `posix_fallocate`, `ppoll`, `preadv`,
-`pwritev`, `readpassphrase`, `reallocarray`, `recallocarray`, `sendmmsg`, `setproctitle`,
-`strcasecmp`, `strchrnul`, `strerror_r`, `strlcat`, `strlcpy`, `strncasecmp`, `strndup`, `strnlen`,
-`strsep`, `strsignal`, `strtonum`, `sync_file_range`, `syncfs`, `syslog`, `timingsafe_bcmp`,
-`timingsafe_memcmp`, `uselocale`, `vasprintf`, `wcstombs_l`.
+`accept4`, `alarm`, `arc4random`, `arc4random_buf`, `arc4random_uniform`, `asprintf`,
+`backtrace_symbols`, `clock_gettime`, `copy_file_range`, `copyfile`, `elf_aux_info`, `eventfd`,
+`explicit_bzero`, `fcntl`, `fdatasync`, `fnmatch`, `freeaddrinfo`, `freezero`, `fseeko`,
+`fsetxattr`, `ftruncate`, `getaddrinfo`, `getaddrinfo_threadsafe`, `getauxval`, `getdelim`,
+`getentropy`, `geteuid`, `gethostbyname_r`, `gethostname`, `getifaddrs`, `getline`, `getopt`,
+`getpagesize`, `getpass_r`, `getpeereid`, `getpeername`, `getppid`, `getprogname`, `getpwuid`,
+`getpwuid_r`, `getrandom`, `getrlimit`, `getsockname`, `gmtime_r`, `if_nametoindex`, `inet_aton`,
+`inet_ntop`, `inet_pton`, `localtime_r`, `localeconv_l`, `mbstowcs_l`, `memmem`, `memrchr`,
+`memset_s`, `mkdtemp`, `pipe`, `pipe2`, `poll`, `posix_fadvise`, `posix_fallocate`, `ppoll`,
+`preadv`, `pwritev`, `readpassphrase`, `reallocarray`, `recallocarray`, `sched_yield`, `sendmmsg`,
+`sendmsg`, `setmode`, `setproctitle`, `setrlimit`, `sigaction`, `siginterrupt`, `sigsetjmp`,
+`signal`, `socket`, `socketpair`, `strcasecmp`, `strchrnul`, `strerror_r`, `strlcat`, `strlcpy`,
+`strncasecmp`, `strndup`, `strnlen`, `strsep`, `strsignal`, `strtonum`, `sync_file_range`,
+`syncfs`, `syslog`, `timingsafe_bcmp`, `timingsafe_memcmp`, `uselocale`, `utimes`, `vasprintf`,
+`wcstombs_l`.
 
 **`libc_headers`** — system headers: headers always present on all supported targets (e.g. `stdlib.h`,
 `string.h`, `fcntl.h`) plus OS-specific ones such as `sys/epoll.h`, `sys/event.h`, `sys/ucred.h`,
