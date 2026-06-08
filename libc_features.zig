@@ -32,13 +32,13 @@ pub const LibcFeatures = struct {
     // fcntl:             4.2BSD, POSIX.1-1988 (all POSIX targets; not Windows)
     // fdatasync:         POSIX.1 (all POSIX targets; not Windows)
     // fnmatch:           4.3BSD-Reno, POSIX.2-1992 (all POSIX targets; not Windows)
-    // freeaddrinfo:      RFC 2553 (1999), glibc 2.1, ancient BSDs (all named targets; Windows via ws2tcpip.h; not WASI)
+    // freeaddrinfo:      RFC 2553 (1999), glibc 2.1, ancient BSDs (all named targets; Windows via ws2tcpip.h; WASI)
     // freezero:          OpenBSD 6.2, DragonFly 5.5
     // fseeko:            POSIX.1 (ubiquitous)
     // fsetxattr:         Linux (glibc 2.3 / kernel 2.4, 5-arg); macOS 10.4+ (6-arg with position and options);
     //                    NOT FreeBSD/NetBSD — use extattr_set_fd(2) instead
     // ftruncate:         4.2BSD, POSIX.1, Windows (mingw64)
-    // getaddrinfo:       RFC 2553 (1999), glibc 2.1, ancient BSDs (all named targets; Windows via ws2tcpip.h; not WASI)
+    // getaddrinfo:       RFC 2553 (1999), glibc 2.1, ancient BSDs (all named targets; Windows via ws2tcpip.h; WASI)
     // getaddrinfo_threadsafe: POSIX.1 (all named targets; not OpenBSD; not WASI)
     // getauxval:         glibc 2.16, musl (Linux only)
     // getdelim, getline: POSIX.1, FreeBSD 8.0, OpenBSD 5.2, NetBSD 6.0
@@ -51,7 +51,7 @@ pub const LibcFeatures = struct {
     // getpagesize:       4.2BSD, SUSv1
     // getpass_r:         NetBSD 7.0
     // getpeereid:        OpenBSD (ancient), FreeBSD 4.6, NetBSD 3.0, macOS, DragonFly
-    // getpeername, getsockname: 4.2BSD, POSIX.1 (all named targets; not WASI)
+    // getpeername, getsockname: 4.2BSD, POSIX.1 (all named targets; WASI 0.2+)
     // getprogname:       NetBSD 1.6, FreeBSD 4.4, OpenBSD 5.4
     // getpwuid:          Version 7 AT&T UNIX, POSIX.1 (all POSIX targets; not Windows/WASI)
     // getpwuid_r:        POSIX.1c (all POSIX targets; NetBSD 3.0, FreeBSD 5.1; not Windows/WASI)
@@ -85,8 +85,8 @@ pub const LibcFeatures = struct {
     // sigaction:         POSIX.1-1990 (all POSIX targets; not Windows/WASI)
     // siginterrupt:      4.3BSD, POSIX.1-2001 (glibc 2.12 for feature-test-macro path); obsolete in POSIX.1-2008
     // sigsetjmp:         POSIX.1-2001 (all POSIX targets; not Windows/WASI)
-    // signal:            Version 4 AT&T UNIX, C89 (all named targets; not WASI)
-    // socket:            4.1cBSD (OpenBSD), 4.2BSD (others) (all named targets; Windows via winsock2.h; not WASI)
+    // signal:            Version 4 AT&T UNIX, C89 (all named targets; WASI)
+    // socket:            4.1cBSD (OpenBSD), 4.2BSD (others) (all named targets; Windows via winsock2.h; WASI 0.2+)
     // socketpair:        4.2BSD, POSIX.1 (all POSIX targets; not Windows/WASI)
     // strcasecmp:        POSIX.1 (ubiquitous)
     // strchrnul:         glibc 2.1.1, musl, FreeBSD 10.0, NetBSD 8.0, DragonFly 3.5, macOS 15.4
@@ -216,6 +216,7 @@ pub fn detect(target: std.Target) LibcFeatures {
         .netbsd => detectNetBSD(target),
         .dragonfly => detectDragonFly(target),
         .windows => detectWindows(),
+        .wasi => detectWASI(target),
         else => .{},
     };
 }
@@ -588,5 +589,58 @@ fn detectWindows() LibcFeatures {
         .strsignal = false,
         .syslog = false,
         .utimes = false,
+    };
+}
+
+// ── WASI ──────────────────────────────────────────────────────────────────────
+
+fn detectWASI(target: std.Target) LibcFeatures {
+    const os = target.os;
+    // Preview 1 (0.1.x): no socket support; preview 2 (0.2+) adds socket(), bind(),
+    // connect(), accept(), getsockname(), getpeername() via the component model.
+    // sendmsg() and socketpair() remain absent even in preview 2.
+    const wasip2 = gte(os, .wasi, .{ .major = 0, .minor = 2, .patch = 0 });
+    return .{
+        // Defaults false → present on WASI (wasi-libc)
+        .arc4random = true,
+        .arc4random_buf = true,
+        .arc4random_uniform = true,
+        .asprintf = true,
+        .explicit_bzero = true,
+        .ftruncate = true,
+        .getdelim = true,
+        .getentropy = true,
+        .getline = true,
+        .getpagesize = true,
+        .memmem = true,
+        .memrchr = true,
+        .mkdtemp = true,
+        .posix_fadvise = true,
+        .posix_fallocate = true,
+        .reallocarray = true,
+        .strlcat = true,
+        .strlcpy = true,
+        .strndup = true,
+        .strnlen = true,
+        .strsep = true,
+        .vasprintf = true,
+        // Socket functions available only from WASI 0.2+ (preview 2)
+        .socket = wasip2,
+        .getpeername = wasip2,
+        .getsockname = wasip2,
+        // Defaults true → absent on WASI
+        .alarm = false,
+        .getaddrinfo_threadsafe = false, // single-threaded in preview 1; not guaranteed in preview 2
+        .geteuid = false,
+        .getppid = false,
+        .getpwuid = false,
+        .getpwuid_r = false,
+        .if_nametoindex = false,
+        .pipe = false,
+        .sendmsg = false,
+        .sigaction = false,
+        .siginterrupt = false,
+        .socketpair = false,
+        .syslog = false,
     };
 }

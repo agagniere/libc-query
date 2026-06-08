@@ -11,12 +11,12 @@ const std = @import("std");
 pub const LibcTypes = struct {
     // Availability reference:
     //
-    // sa_family_t:            POSIX.1-2001 (all POSIX targets; not Windows)
-    // socklen_t:              POSIX.1-2001 (all supported targets; Windows via ws2tcpip.h)
-    // struct sockaddr.sa_len: BSDs, macOS (not Linux/Windows — explicit length passed separately)
-    // struct tm.tm_zone:      BSD/glibc extension (all POSIX targets; not Windows;
+    // sa_family_t:            POSIX.1-2001 (all POSIX targets including WASI; not Windows)
+    // socklen_t:              POSIX.1-2001 (all supported targets including WASI; Windows via ws2tcpip.h)
+    // struct sockaddr.sa_len: BSDs, macOS (not Linux/Windows/WASI — explicit length passed separately)
+    // struct tm.tm_zone:      BSD/glibc extension (all POSIX targets; not Windows/WASI;
     //                         requires _GNU_SOURCE or _BSD_SOURCE on glibc/musl)
-    // suseconds_t:            POSIX.1-2001 (all POSIX targets; not Windows)
+    // suseconds_t:            POSIX.1-2001 (all POSIX targets including WASI; not Windows)
 
     sa_family_t: bool = true,
     socklen_t: bool = true,
@@ -39,6 +39,8 @@ pub fn detect(target: std.Target) LibcTypes {
         .dragonfly,
         => .{ .struct_sockaddr_sa_len = true },
         .linux => .{},
+        // WASI has sa_family_t, socklen_t, suseconds_t typedefs; struct tm uses __tm_zone (not tm_zone)
+        .wasi => .{ .struct_tm_tm_zone = false },
         .windows => .{ .sa_family_t = false, .struct_tm_tm_zone = false, .suseconds_t = false },
         else => .{ .sa_family_t = false, .socklen_t = false, .struct_tm_tm_zone = false, .suseconds_t = false },
     };

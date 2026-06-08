@@ -106,6 +106,15 @@ WINDOWS_HEADERS: frozenset[str] = frozenset({
     "string.h", "strings.h", "sys/stat.h", "sys/types.h", "unistd.h",
 })
 
+# WASI: scanned from Zig's bundled wasm-wasi-musl headers.
+# Covers both preview 1 (0.1.x) and preview 2 (0.2.x); the header set is the same for
+# both — preview 2 only adds socket function implementations, not new headers.
+WASI_HEADERS: frozenset[str] = frozenset({
+    "arpa/inet.h", "fcntl.h", "ifaddrs.h", "inttypes.h", "netdb.h", "netinet/in.h",
+    "poll.h", "stdlib.h", "string.h", "sys/ioctl.h", "sys/resource.h", "sys/select.h",
+    "sys/stat.h", "sys/types.h", "sys/un.h", "unistd.h",
+})
+
 OS_DISPLAY: dict[str, str] = {
     "glibc":     "glibc",
     "musl":      "musl",
@@ -115,6 +124,7 @@ OS_DISPLAY: dict[str, str] = {
     "darwin":    "macOS",
     "dragonfly": "DragonFly",
     "windows":   "Windows (mingw64)",
+    "wasi":      "WASI",
 }
 
 
@@ -195,6 +205,7 @@ def main() -> None:
         "darwin":    DARWIN_HEADERS,
         "dragonfly": DRAGONFLY_HEADERS,
         "windows":   WINDOWS_HEADERS,
+        "wasi":      WASI_HEADERS,
     }
 
     always_present = frozenset(
@@ -258,6 +269,7 @@ def main() -> None:
     print("        .netbsd => detectNetBSD(),")
     print("        .dragonfly => detectDragonFly(),")
     print("        .windows => detectWindows(),")
+    print("        .wasi => detectWASI(),")
     print("        else => .{")
     for h in sorted(always_present):
         print(f"            .{field(h)} = false,")
@@ -299,6 +311,12 @@ def main() -> None:
     print("// ── Windows (mingw64) ─────────────────────────────────────────────────────────")
     print()
     for line in emit_fn("detectWindows", "windows", WINDOWS_HEADERS, always_present):
+        print(line)
+    print()
+
+    print("// ── WASI ──────────────────────────────────────────────────────────────────────")
+    print()
+    for line in emit_fn("detectWASI", "wasi", WASI_HEADERS, always_present):
         print(line)
     print()
 

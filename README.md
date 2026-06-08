@@ -2,7 +2,7 @@
 
 Compile-time detection of libc symbol and header availability for Zig cross-compilation targets.
 
-Covers **glibc**, **musl**, **macOS**, **FreeBSD**, **OpenBSD**, **NetBSD**, **DragonFly**, and **Windows (mingw64)**.
+Covers **glibc**, **musl**, **macOS**, **FreeBSD**, **OpenBSD**, **NetBSD**, **DragonFly**, **Windows (mingw64)**, and **WASI** (preview 1 and preview 2).
 
 ## What is tracked
 
@@ -29,12 +29,13 @@ Covers **glibc**, **musl**, **macOS**, **FreeBSD**, **OpenBSD**, **NetBSD**, **D
 only), and others.
 
 **`libc_types`** — struct field and typedef presence: `sa_family_t`, `socklen_t`, `suseconds_t`
-(all POSIX targets), `struct_sockaddr_sa_len` (BSDs and macOS), `struct_tm_tm_zone` (all POSIX
-targets).
+(all POSIX targets including WASI), `struct_sockaddr_sa_len` (BSDs and macOS), `struct_tm_tm_zone`
+(all POSIX targets except WASI, which uses `__tm_zone`).
 
-**`libc_constants`** — constant/declaration availability: `clock_monotonic` (all POSIX targets),
-`clock_monotonic_raw` (Linux and Darwin), `f_fullfsync` (macOS only),
-`msg_nosignal` (Linux, BSDs, DragonFly, macOS 14.0+), `o_nonblock` (all POSIX targets).
+**`libc_constants`** — constant/declaration availability: `clock_monotonic` (all POSIX targets
+including WASI), `clock_monotonic_raw` (Linux and Darwin), `f_fullfsync` (macOS only),
+`msg_nosignal` (Linux, BSDs, DragonFly, macOS 14.0+), `o_nonblock` (all POSIX targets
+including WASI).
 
 For glibc, function availability is per-architecture and derived from Zig's bundled `abilists` file.
 
